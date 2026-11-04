@@ -15,6 +15,7 @@
 | [05-notifications.md](05-notifications.md) | الإشعارات، عدد غير المقروء، تعليمها كمقروءة |
 | [06-api-docs.md](06-api-docs.md) | التوثيق التفاعلي: `/docs` و Swagger و Postman Collection جاهزة |
 | [07-inventory-service.md](07-inventory-service.md) | خدمة المستودع (.NET gRPC): كيف تعمل، منع الـ Race Condition، وتجربتها |
+| [08-grpc-integration.md](08-grpc-integration.md) | ربط Laravel بالمستودع: ماذا يرى المستخدم عند التوقف أو البطء، وتجارب الفشل |
 
 ---
 

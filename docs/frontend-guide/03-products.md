@@ -225,14 +225,26 @@ curl --location --request PATCH '{{base_url}}/products/1/stock' \
 لترى كيف يتصرف التطبيق عندما تتوقف خدمة المستودع:
 
 ```bash
-INVENTORY_FAKE_DOWN=true docker compose up -d
+docker compose stop inventory-service
 ```
 - عرض المنتجات يعمل، و `stock.status` = `unavailable`.
-- إضافة منتج أو تعديل الكمية ← **503**.
+- إضافة منتج أو تعديل الكمية ← **503** خلال ثانيتين على الأكثر (مهلة النداء).
 
 للعودة للوضع الطبيعي:
 ```bash
-docker compose up -d
+docker compose start inventory-service
+```
+
+وللتجربة مع مستودع **بطيء** (يرد بعد 5 ثوانٍ، والمهلة ثانيتان):
+```bash
+INVENTORY_SIMULATED_DELAY_MS=5000 docker compose up -d inventory-service
+# ... جرّب، ثم أعده طبيعياً:
+docker compose up -d inventory-service
+```
+
+لإرجاع كميات المنتجات التجريبية لقيمها الأولى (مثلاً قبل عرض):
+```bash
+docker compose exec core-api php artisan inventory:seed-sample
 ```
 
 ## سيناريوهات اختبار سريعة في Postman

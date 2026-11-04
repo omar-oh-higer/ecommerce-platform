@@ -24,6 +24,8 @@ public sealed class InventoryServiceFixture : IAsyncLifetime
 
     public Inventory.InventoryClient Client { get; private set; } = null!;
 
+    public string ConnectionString => _postgres.GetConnectionString();
+
     /// <summary>Each test uses its own product ids so tests never affect each other.</summary>
     public long NewProductId() => Interlocked.Increment(ref _nextProductId);
 

@@ -7,7 +7,7 @@ namespace InventoryService.Services;
 /// <summary>
 /// Turns infrastructure failures into clear gRPC status codes instead of a generic UNKNOWN:
 ///  - database unreachable  → UNAVAILABLE (the caller may retry later)
-///  - client deadline/cancel → CANCELLED / DEADLINE_EXCEEDED
+///  - client deadline passed → DEADLINE_EXCEEDED, client hung up → CANCELLED
 /// Internal details are logged, never sent to the client.
 /// </summary>
 public sealed class ErrorInterceptor(ILogger<ErrorInterceptor> logger) : Interceptor
@@ -25,10 +25,14 @@ public sealed class ErrorInterceptor(ILogger<ErrorInterceptor> logger) : Interce
         {
             throw;
         }
-        catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+        catch (Exception e) when (e is OperationCanceledException || context.CancellationToken.IsCancellationRequested)
         {
-            var code = context.Deadline <= DateTime.UtcNow ? StatusCode.DeadlineExceeded : StatusCode.Cancelled;
-            logger.LogWarning("{Method} stopped: {Code}", context.Method, code);
+            // Whatever failed once the call was cancelled is a consequence of the cancellation.
+            // The call's token fires for two reasons: the client hung up (the HTTP request was
+            // aborted) or the client's deadline passed. No request abort means it was the deadline.
+            var code = ClientHungUp(context) ? StatusCode.Cancelled : StatusCode.DeadlineExceeded;
+
+            logger.LogWarning("{Method} stopped: {Code} ({Exception})", context.Method, code, e.GetType().Name);
             throw new RpcException(new Status(code, "The call was cancelled or its deadline expired."));
         }
         catch (Exception e) when (e is NpgsqlException || e.InnerException is NpgsqlException)
@@ -40,6 +44,18 @@ public sealed class ErrorInterceptor(ILogger<ErrorInterceptor> logger) : Interce
         {
             logger.LogError(e, "{Method} failed", context.Method);
             throw new RpcException(new Status(StatusCode.Internal, "Unexpected inventory error."));
+        }
+    }
+
+    private static bool ClientHungUp(ServerCallContext context)
+    {
+        try
+        {
+            return context.GetHttpContext().RequestAborted.IsCancellationRequested;
+        }
+        catch (ObjectDisposedException)
+        {
+            return true; // the request is already gone
         }
     }
 }

@@ -6,7 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc(options =>
 {
-    options.Interceptors.Add<ErrorInterceptor>();
+    options.Interceptors.Add<ErrorInterceptor>();          // outermost: maps every failure to a clear status
+    options.Interceptors.Add<SimulatedDelayInterceptor>(); // demo only, off unless configured
     options.EnableDetailedErrors = false; // never send stack traces to clients
 });
 builder.Services.AddGrpcReflection(); // lets grpcurl / Postman discover the service

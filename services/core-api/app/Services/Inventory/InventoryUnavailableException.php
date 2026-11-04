@@ -7,7 +7,8 @@ use Throwable;
 
 /**
  * The inventory service is down or did not answer before the deadline.
- * Rendered as 503 SERVICE_UNAVAILABLE in the unified error format.
+ * Rendered as 503 INVENTORY_UNAVAILABLE in the unified error format.
+ * The technical cause is kept as the previous exception: it appears in the logs, never in the response.
  */
 class InventoryUnavailableException extends ApiException
 {
@@ -17,11 +18,8 @@ class InventoryUnavailableException extends ApiException
             'INVENTORY_UNAVAILABLE',
             'The inventory service is not available right now. Please try again later.',
             503,
+            [],
+            $previous,
         );
-
-        if ($previous) {
-            // Keep the technical reason in the logs only.
-            report($previous);
-        }
     }
 }

@@ -25,8 +25,17 @@ services:
   core-api:
     build:
       context: ./services/core-api
-    volumes:
+    volumes: &core-api-volumes
       - ./services/core-api:/var/www/html
+      # vendor/ lives in a Docker volume (fast Linux filesystem). Reading thousands of vendor
+      # files through the Windows/macOS folder mount made every request take seconds.
+      - core-api-vendor:/var/www/html/vendor
+    # When the inventory container is stopped its name disappears from Docker's DNS, and the
+    # lookup is forwarded to the host's DNS, which can take ~8 s to fail. A 1 s DNS timeout keeps
+    # "inventory service down" answers within the gRPC deadline instead of making users wait.
+    dns_opt: &fast-dns
+      - timeout:1
+      - attempts:1
     environment: &core-api-env
       APP_ENV: local
       APP_DEBUG: "true"
@@ -39,12 +48,17 @@ services:
       DB_USERNAME: ecommerce
       DB_PASSWORD: secret
       LOG_CHANNEL: stderr
-      # Until the .NET service is connected the app uses a built-in fake inventory.
-      # Demo "inventory is down":  INVENTORY_FAKE_DOWN=true docker compose up -d
-      INVENTORY_DRIVER: ${INVENTORY_DRIVER:-fake}
-      INVENTORY_FAKE_DOWN: ${INVENTORY_FAKE_DOWN:-false}
+      # Stock comes from the .NET inventory service over gRPC. Every call has a deadline:
+      # when the service is down or slower than INVENTORY_TIMEOUT_MS the user gets a clear 503.
+      INVENTORY_DRIVER: grpc
+      INVENTORY_GRPC_HOST: inventory-service:5001
+      INVENTORY_TIMEOUT_MS: ${INVENTORY_TIMEOUT_MS:-2000}
     depends_on:
       mysql:
+        condition: service_healthy
+      # Waited for at start-up only (so the sample stock can be seeded).
+      # Afterwards core-api keeps running even if the inventory service stops.
+      inventory-service:
         condition: service_healthy
     healthcheck:
       # Healthy once the entrypoint finished and php-fpm is listening.
@@ -63,8 +77,8 @@ services:
     build:
       context: ./services/core-api
     command: ["php", "artisan", "queue:work", "--sleep=3", "--max-time=3600"]
-    volumes:
-      - ./services/core-api:/var/www/html
+    dns_opt: *fast-dns
+    volumes: *core-api-volumes
     environment:
       <<: *core-api-env
       CONTAINER_ROLE: worker
@@ -103,6 +117,9 @@ services:
     environment:
       ConnectionStrings__Inventory: Host=inventory-db;Port=5432;Database=inventory;Username=inventory;Password=secret
       ASPNETCORE_ENVIRONMENT: Production
+      # Demo "the inventory service is slow":
+      #   INVENTORY_SIMULATED_DELAY_MS=5000 docker compose up -d inventory-service
+      Inventory__SimulatedDelayMs: ${INVENTORY_SIMULATED_DELAY_MS:-0}
     ports:
       # Exposed for testing with grpcurl / Postman from the host.
       - "${INVENTORY_GRPC_PORT:-5001}:5001"
@@ -138,3 +155,4 @@ services:
 volumes:
   mysql-data:
   inventory-data:
+  core-api-vendor:
