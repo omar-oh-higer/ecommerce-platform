@@ -60,6 +60,11 @@ class _ProductsPageState extends State<ProductsPage> {
             ),
             onPressed: () => context.push('/cart'),
           ),
+          IconButton(
+            tooltip: 'My orders',
+            icon: const Icon(Icons.receipt_long_outlined),
+            onPressed: () => context.push('/orders'),
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle_outlined),
             onSelected: (v) {

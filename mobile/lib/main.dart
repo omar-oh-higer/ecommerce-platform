@@ -34,6 +34,7 @@ void main() {
     config: config,
     api: api,
     catalog: catalog,
+    orders: OrdersRepository(api),
     cart: CartCubit(PrefsCartStorage())..load(),
     products: ProductsCubit(catalog)..load(),
   ));
