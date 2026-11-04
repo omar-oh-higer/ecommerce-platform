@@ -138,12 +138,19 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 | أشغّل المشروع | `docker compose up -d` |
 | أوقف المشروع (البيانات تبقى) | `docker compose down` |
 | أرى السجلات والأخطاء | `docker compose logs -f core-api` |
-| أحدّث بعد تعديلات زميلي | `git pull` ثم `docker compose up -d --build` |
+| **أحدّث بعد تعديلات زميلي** | `git pull` ثم `docker compose up -d --build --force-recreate core-api queue-worker` |
 | أرجع القاعدة للحالة الأولى (تُحذف كل البيانات) | `docker compose down -v` ثم `docker compose up -d` |
 | أشغّل اختبارات الـ Backend | `docker compose exec core-api php artisan test` |
 | أنفّذ أمر Laravel | `docker compose exec core-api php artisan <command>` |
 
-بعد `git pull` الحاوية تطبّق تلقائياً أي تعديلات على قاعدة البيانات (migrations) والمكتبات الجديدة عند إعادة التشغيل.
+### بعد كل `git pull`
+```bash
+git pull
+docker compose up -d --build --force-recreate core-api queue-worker
+```
+حاوية `core-api` تطبّق الجداول الجديدة (migrations) والمكتبات الجديدة **عند بدء تشغيلها فقط**.
+`--force-recreate` يضمن إعادة تشغيلها حتى لو لم تتغير الصورة، وإعادة تشغيل `queue-worker` حتى يقرأ الكود الجديد.
+بدونه قد ترى خطأ مثل `Table '...' doesn't exist`. قاعدة البيانات لا تتأثر (بياناتك تبقى).
 
 ---
 
