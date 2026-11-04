@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package inventory.v1;
+
+option csharp_namespace = "InventoryService.Grpc";
+option php_namespace = "App\\Grpc\\Inventory";
+option php_metadata_namespace = "App\\Grpc\\GPBMetadata";
+
+// خدمة المستودع: يستدعيها Laravel (core-api) وينفذها .NET (inventory-service)
+service Inventory {
+  // الكمية المتوفرة لمنتج واحد
+  rpc GetStock (GetStockRequest) returns (StockReply);
+
+  // الكميات المتوفرة لعدة منتجات دفعة واحدة (لصفحة السلة مثلاً)
+  rpc GetStockBatch (GetStockBatchRequest) returns (GetStockBatchReply);
+
+  // حجز الكميات عند إنشاء الطلب (كل العناصر أو لا شيء)
+  rpc ReserveStock (ReserveStockRequest) returns (ReservationReply);
+
+  // تأكيد الحجز بعد نجاح الدفع: تُخصم الكمية نهائياً
+  rpc ConfirmReservation (ReservationRequest) returns (ReservationReply);
+
+  // إلغاء الحجز عند إلغاء الطلب أو فشل الدفع: تعود الكمية للمخزون
+  rpc ReleaseReservation (ReservationRequest) returns (ReservationReply);
+
+  // تعديل المخزون من لوحة المسؤول
+  rpc SetStock (SetStockRequest) returns (StockReply);
+}
+
+message GetStockRequest {
+  int64 product_id = 1;
+}
+
+message GetStockBatchRequest {
+  repeated int64 product_ids = 1;
+}
+
+message GetStockBatchReply {
+  repeated StockReply items = 1;
+}
+
+message StockReply {
+  int64 product_id = 1;
+  int32 available = 2;  // المتاح للبيع = الكلي - المحجوز
+  int32 reserved = 3;
+}
+
+message OrderItem {
+  int64 product_id = 1;
+  int32 quantity = 2;
+}
+
+message ReserveStockRequest {
+  int64 order_id = 1;
+  repeated OrderItem items = 2;
+}
+
+message ReservationRequest {
+  int64 order_id = 1;
+}
+
+enum ReservationStatus {
+  RESERVATION_STATUS_UNSPECIFIED = 0;
+  RESERVATION_STATUS_RESERVED = 1;
+  RESERVATION_STATUS_CONFIRMED = 2;
+  RESERVATION_STATUS_RELEASED = 3;
+  RESERVATION_STATUS_REJECTED = 4;  // كمية غير كافية
+}
+
+message ReservationReply {
+  int64 order_id = 1;
+  ReservationStatus status = 2;
+  string message = 3;
+  repeated OrderItem unavailable_items = 4;  // العناصر التي لا تكفي كميتها عند الرفض
+}
+
+message SetStockRequest {
+  int64 product_id = 1;
+  int32 quantity = 2;
+}
