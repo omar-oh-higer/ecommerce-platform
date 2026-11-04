@@ -12,6 +12,7 @@ dependencies:
   equatable: ^3.0.0
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.1
   intl: ^0.20.3
 
 dev_dependencies:
