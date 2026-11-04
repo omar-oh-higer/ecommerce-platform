@@ -33,3 +33,8 @@ Interactive docs once the backend is up: `http://localhost:8000/docs/`, `/swagge
 (cd mobile && flutter analyze && flutter test)
 (cd dashboard && flutter analyze && flutter test)
 ```
+
+## Running `flutter test` from this folder
+The project folder name contains an apostrophe (`Internet Application's project`), which breaks the test runner that
+Flutter generates. If `flutter test` fails with "Too many positional arguments", run the tests from a copy of the
+project in a path without special characters (or clone the repo to such a path).
