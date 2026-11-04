@@ -6,6 +6,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -56,6 +57,11 @@ class ApiExceptionRenderer
 
         if ($e instanceof AuthenticationException) {
             return self::json(401, self::CODES[401], 'Authentication is required.');
+        }
+
+        // Malformed, expired or blacklisted JWT.
+        if ($e instanceof JWTException) {
+            return self::json(401, 'INVALID_TOKEN', 'The token is invalid or has expired.');
         }
 
         // Covers 403 (authorization), 404 (missing model/route), 405, 429 (throttle), ...
