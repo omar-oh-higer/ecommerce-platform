@@ -202,6 +202,6 @@ curl --location --request PATCH '{{base_url}}/orders/1/status' \
 | 7 | المسؤول: `confirmed` ← `shipped` ← `delivered` | 200 في كل خطوة |
 | 8 | المسؤول يلغي طلباً `delivered` | 409 `INVALID_STATUS_TRANSITION` |
 | 9 | المسؤول يلغي طلباً `pending` | 200، والكمية رجعت للمنتج |
-| 10 | `INVENTORY_FAKE_DOWN=true docker compose up -d` ثم إنشاء طلب | 503، ولا يظهر الطلب في القائمة |
+| 10 | `docker compose stop inventory-service` ثم إنشاء طلب | 503 خلال ثانيتين، ولا يظهر الطلب في القائمة (أعدها بـ `docker compose start inventory-service`) |
 
 > السيناريوهان 5 و 6 هما **الإثبات المطلوب في المتطلب الأول**: مستخدم يحاول الوصول إلى طلب غيره، أو تنفيذ عملية ليست من صلاحيته ← يُرفض.

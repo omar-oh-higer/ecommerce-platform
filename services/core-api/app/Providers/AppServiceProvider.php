@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Inventory\FakeInventoryClient;
+use App\Services\Inventory\GrpcInventoryClient;
 use App\Services\Inventory\InventoryClient;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
         // Which inventory implementation the app uses (config/services.php → inventory.driver).
         $this->app->singleton(InventoryClient::class, function ($app) {
             return match (config('services.inventory.driver')) {
+                'grpc' => new GrpcInventoryClient(
+                    (string) config('services.inventory.grpc_host'),
+                    (int) config('services.inventory.timeout_ms'),
+                ),
                 'fake' => new FakeInventoryClient($app['cache']->store(), (bool) config('services.inventory.fake_down')),
                 default => throw new InvalidArgumentException('Unknown inventory driver: '.config('services.inventory.driver')),
             };

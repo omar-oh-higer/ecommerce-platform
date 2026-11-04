@@ -30,8 +30,12 @@ return [
 
     // Inventory service (see proto/inventory.proto).
     'inventory' => [
-        // "fake" until the .NET gRPC service is connected, then "grpc".
-        'driver' => env('INVENTORY_DRIVER', 'fake'),
+        // "grpc": the .NET inventory service (Docker). "fake": in-app stand-in (tests, or PHP without ext-grpc).
+        'driver' => env('INVENTORY_DRIVER', 'grpc'),
+        // host:port of the gRPC service.
+        'grpc_host' => env('INVENTORY_GRPC_HOST', 'inventory-service:5001'),
+        // Deadline for every call. Past it the user gets 503 instead of waiting.
+        'timeout_ms' => (int) env('INVENTORY_TIMEOUT_MS', 2000),
         // Only for the fake driver: simulate the service being down.
         'fake_down' => (bool) env('INVENTORY_FAKE_DOWN', false),
     ],

@@ -5,16 +5,20 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\Inventory\InventoryClient;
+use App\Services\Inventory\InventoryUnavailableException;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
  * Sample catalogue so the app has something to show right after setup.
  * Safe to run many times: existing rows and their stock are left untouched.
+ * To reset the sample quantities at any time: php artisan inventory:seed-sample
  */
 class CatalogSeeder extends Seeder
 {
-    private const CATALOG = [
+    /** category => [name, description, price, initial stock] */
+    public const CATALOG = [
         'Electronics' => [
             ['Wireless Headphones', 'Over-ear Bluetooth headphones with noise cancelling.', '79.99', 25],
             ['USB-C Charger 65W', 'Fast charger for laptops and phones.', '29.50', 40],
@@ -45,9 +49,19 @@ class CatalogSeeder extends Seeder
                 );
 
                 if ($product->wasRecentlyCreated) {
-                    $inventory->setStock($product->id, $quantity);
+                    $this->setStock($inventory, $product, $quantity);
                 }
             }
+        }
+    }
+
+    /** The app must still start when the inventory service is down: stock can be set later. */
+    private function setStock(InventoryClient $inventory, Product $product, int $quantity): void
+    {
+        try {
+            $inventory->setStock($product->id, $quantity);
+        } catch (InventoryUnavailableException) {
+            Log::warning("Sample stock for '{$product->name}' not set: inventory service unavailable. Run: php artisan inventory:seed-sample");
         }
     }
 }

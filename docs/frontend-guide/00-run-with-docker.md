@@ -188,9 +188,14 @@ docker compose logs --tail=50 core-api
 **أريد البدء من الصفر تماماً**
 ```bash
 docker compose down -v
-rm -rf services/core-api/vendor services/core-api/.env
+rm -f services/core-api/.env
 docker compose up -d --build
 ```
+`down -v` يحذف قواعد البيانات **ومكتبات PHP** (مجلد `vendor` محفوظ في volume داخل Docker، لا في مجلد المشروع)، فيعاد تثبيتها تلقائياً.
 
-**البناء بطيء جداً على Mac**
-في Docker Desktop ← Settings ← Resources: اجعل الذاكرة 4GB على الأقل.
+**البناء بطيء جداً أو Docker Desktop توقف أثناء البناء**
+بناء صورة PHP يجمّع إضافة `grpc` من المصدر (10–20 دقيقة أول مرة) ويحتاج ذاكرة.
+في Docker Desktop ← Settings ← Resources: اجعل الذاكرة **6 GB** على الأقل. إذا توقف Docker: أعد تشغيله (أيقونة الحوت ← Restart) ثم أعد `docker compose up -d --build`؛ ما اكتمل من البناء محفوظ ولا يُعاد.
+
+**كل طلب يأخذ عدة ثوانٍ**
+تأكد أنك على آخر نسخة (`git pull`): مكتبات PHP صارت في volume داخل Docker لأن قراءتها من مجلد المشروع كانت بطيئة جداً، خاصة على Windows.

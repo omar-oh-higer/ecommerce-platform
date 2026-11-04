@@ -32,6 +32,11 @@
         <env name="DB_DATABASE" value=":memory:" force="true"/>
         <server name="DB_DATABASE" value=":memory:" force="true"/>
         <env name="DB_URL" value="" force="true"/>
+        <!-- Tests never call the real inventory service: they use the in-app fake. -->
+        <env name="INVENTORY_DRIVER" value="fake" force="true"/>
+        <server name="INVENTORY_DRIVER" value="fake" force="true"/>
+        <env name="INVENTORY_FAKE_DOWN" value="false" force="true"/>
+        <server name="INVENTORY_FAKE_DOWN" value="false" force="true"/>
         <server name="DB_URL" value="" force="true"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

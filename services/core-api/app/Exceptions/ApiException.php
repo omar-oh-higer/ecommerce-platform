@@ -16,7 +16,9 @@ class ApiException extends RuntimeException
         string $message,
         public readonly int $status = 400,
         public readonly array $details = [],
+        ?\Throwable $previous = null,
     ) {
-        parent::__construct($message);
+        // $previous keeps the technical cause for the logs; the client only sees code + message.
+        parent::__construct($message, 0, $previous);
     }
 }
