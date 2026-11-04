@@ -20,9 +20,10 @@ class DatabaseSeeder extends Seeder
         $admin->role = Role::Admin;
         $admin->save();
 
-        User::factory()->create([
-            'name' => 'Test Customer',
-            'email' => 'customer@store.test',
-        ]);
+        // Safe to run on every container start: creates the account only once.
+        User::firstOrCreate(
+            ['email' => 'customer@store.test'],
+            ['name' => 'Test Customer', 'password' => 'password'],
+        );
     }
 }
