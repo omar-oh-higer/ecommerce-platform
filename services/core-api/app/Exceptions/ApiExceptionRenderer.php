@@ -68,7 +68,10 @@ class ApiExceptionRenderer
 
         // Missing record: "Product not found." instead of the internal class name.
         if ($e instanceof NotFoundHttpException && $e->getPrevious() instanceof ModelNotFoundException) {
-            $model = class_basename($e->getPrevious()->getModel());
+            $model = match ($class = class_basename($e->getPrevious()->getModel())) {
+                'DatabaseNotification' => 'Notification',
+                default => $class,
+            };
 
             return self::json(404, self::CODES[404], "{$model} not found.");
         }

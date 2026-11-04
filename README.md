@@ -19,6 +19,8 @@ curl http://localhost:8000/api/v1
 
 The first run takes 10–20 minutes (building the PHP image and installing dependencies).
 
+- Interactive API docs: http://localhost:8000/docs/ · Swagger UI: http://localhost:8000/swagger/ ·
+  Postman collection: http://localhost:8000/docs/collection.json · OpenAPI: http://localhost:8000/docs/openapi.yaml
 - Full guide: [docs/frontend-guide/00-run-with-docker.md](docs/frontend-guide/00-run-with-docker.md)
 - API guide with Postman-ready curl: [docs/frontend-guide](docs/frontend-guide/README.md)
 - Architecture: [docs/architecture.md](docs/architecture.md)

@@ -1,0 +1,1006 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost:8000"
+        }
+    ],
+    "info": {
+        "name": "E-Commerce Platform API \u2014 v1",
+        "_postman_id": "cab514cd-f28a-44d8-8a48-d3f35574a8cc",
+        "description": "REST API of the core application (Laravel). Damascus University \u2014 Internet Applications project 2026.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "description": "\nJWT authentication. Send the token as `Authorization: Bearer {token}`.",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/register",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/register"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"Omar\",\"email\":\"omar@example.com\",\"password\":\"Secret123\",\"password_confirmation\":\"Secret123\"}"
+                        },
+                        "description": "Creates a **customer** account and logs it in. Sending `role` has no effect.\nLimited to 10 registrations per minute per IP.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\", \"token_type\": \"bearer\", \"expires_in\": 3600, \"user\": {\"id\": 3, \"name\": \"Omar\", \"email\": \"omar@example.com\", \"role\": \"customer\", \"created_at\": \"2026-11-04T10:15:00+00:00\"}}",
+                            "name": "Registered"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"error\": {\"code\": \"VALIDATION_FAILED\", \"message\": \"The given data was invalid.\", \"details\": {\"email\": [\"The email has already been taken.\"], \"password\": [\"The password field must be at least 8 characters.\"]}}}",
+                            "name": "Email taken \/ weak password"
+                        }
+                    ]
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/login",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/login"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"customer@store.test\",\"password\":\"password\"}"
+                        },
+                        "description": "Limited to **5 attempts per minute** for the same email and IP (then 429 with `Retry-After`).\nThe error is the same whether the email exists or not.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\", \"token_type\": \"bearer\", \"expires_in\": 3600, \"user\": {\"id\": 2, \"name\": \"Test Customer\", \"email\": \"customer@store.test\", \"role\": \"customer\", \"created_at\": \"2026-11-04T10:00:00+00:00\"}}",
+                            "name": "Logged in"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\": {\"code\": \"INVALID_CREDENTIALS\", \"message\": \"The email or password is incorrect.\", \"details\": {}}}",
+                            "name": "Wrong email or password"
+                        },
+                        {
+                            "header": [],
+                            "code": 429,
+                            "body": "{\"error\": {\"code\": \"TOO_MANY_REQUESTS\", \"message\": \"Too Many Attempts.\", \"details\": {}}}",
+                            "name": "Too many attempts"
+                        }
+                    ]
+                },
+                {
+                    "name": "Current user",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/me"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 2, \"name\": \"Test Customer\", \"email\": \"customer@store.test\", \"role\": \"customer\", \"created_at\": \"2026-11-04T10:00:00+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\": {\"code\": \"UNAUTHENTICATED\", \"message\": \"Authentication is required.\", \"details\": {}}}",
+                            "name": "No or invalid token"
+                        }
+                    ]
+                },
+                {
+                    "name": "Refresh token",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/refresh",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/refresh"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns a new token. **The old token stops working immediately.**"
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\", \"token_type\": \"bearer\", \"expires_in\": 3600, \"user\": {\"id\": 2, \"name\": \"Test Customer\", \"email\": \"customer@store.test\", \"role\": \"customer\", \"created_at\": \"2026-11-04T10:00:00+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\": {\"code\": \"UNAUTHENTICATED\", \"message\": \"Authentication is required.\", \"details\": {}}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/auth\/logout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/auth\/logout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "The current token is blacklisted: using it again returns 401."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 204,
+                            "body": "{}",
+                            "name": "Logged out"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Catalogue",
+            "description": "",
+            "item": [
+                {
+                    "name": "List categories",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/categories",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/categories"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Use `id` as `category_id` to filter products.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": [{\"id\": 2, \"name\": \"Books\", \"slug\": \"books\", \"products_count\": 2}, {\"id\": 3, \"name\": \"Clothing\", \"slug\": \"clothing\", \"products_count\": 2}, {\"id\": 1, \"name\": \"Electronics\", \"slug\": \"electronics\", \"products_count\": 3}]}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "List products",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/products",
+                            "query": [
+                                {
+                                    "key": "category_id",
+                                    "value": "1",
+                                    "description": "Only products of this category.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "jacket",
+                                    "description": "Search in the product name.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "2",
+                                    "description": "Between 1 and 50 (default 15).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default 1).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/products?category_id=1&search=jacket&per_page=2&page=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"category_id\":16,\"search\":\"n\",\"per_page\":7,\"page\":66}"
+                        },
+                        "description": "Newest first, paginated. Stock is read from the inventory service in **one call for the whole page**.\nIf the inventory service is down the list still works and `stock.status` is `unavailable`.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": [{\"id\": 7, \"name\": \"Winter Jacket\", \"description\": \"Water-resistant jacket with hood.\", \"price\": \"89.00\", \"image_url\": null, \"category\": {\"id\": 3, \"name\": \"Clothing\", \"slug\": \"clothing\"}, \"stock\": {\"quantity\": 8, \"status\": \"in_stock\"}, \"created_at\": \"2026-11-04T19:50:03+00:00\"}, {\"id\": 6, \"name\": \"Cotton T-Shirt\", \"description\": \"100% cotton, regular fit.\", \"price\": \"12.00\", \"image_url\": null, \"category\": {\"id\": 3, \"name\": \"Clothing\", \"slug\": \"clothing\"}, \"stock\": {\"quantity\": 100, \"status\": \"in_stock\"}, \"created_at\": \"2026-11-04T19:50:03+00:00\"}], \"links\": {\"first\": \"http:\/\/localhost:8000\/api\/v1\/products?per_page=2&page=1\", \"last\": \"http:\/\/localhost:8000\/api\/v1\/products?per_page=2&page=4\", \"prev\": null, \"next\": \"http:\/\/localhost:8000\/api\/v1\/products?per_page=2&page=2\"}, \"meta\": {\"current_page\": 1, \"from\": 1, \"last_page\": 4, \"path\": \"http:\/\/localhost:8000\/api\/v1\/products\", \"per_page\": 2, \"to\": 2, \"total\": 8}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"error\": {\"code\": \"VALIDATION_FAILED\", \"message\": \"The given data was invalid.\", \"details\": {\"per_page\": [\"The per page field must not be greater than 50.\"]}}}",
+                            "name": "Bad filters"
+                        }
+                    ]
+                },
+                {
+                    "name": "Product details",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/products\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/products\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the product."
+                                },
+                                {
+                                    "id": "product",
+                                    "key": "product",
+                                    "value": 1,
+                                    "description": "The product id."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "The quantity is asked from the inventory service at request time.\n`stock.status`: `in_stock`, `out_of_stock`, or `unavailable` (inventory service down, `quantity` is null).",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 8, \"name\": \"Gaming Mouse\", \"description\": \"RGB mouse\", \"price\": \"25.50\", \"image_url\": \"http:\/\/localhost:8000\/storage\/products\/SizurDJW4OgLiAJsDCvmDcSQbpIPE0mdLif8Yjlh.png\", \"category\": {\"id\": 1, \"name\": \"Electronics\", \"slug\": \"electronics\"}, \"stock\": {\"quantity\": 5, \"status\": \"in_stock\"}, \"created_at\": \"2026-11-04T19:51:54+00:00\"}}",
+                            "name": "Found"
+                        },
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 8, \"name\": \"Gaming Mouse\", \"description\": \"RGB mouse\", \"price\": \"25.50\", \"image_url\": null, \"category\": {\"id\": 1, \"name\": \"Electronics\", \"slug\": \"electronics\"}, \"stock\": {\"quantity\": null, \"status\": \"unavailable\"}, \"created_at\": \"2026-11-04T19:51:54+00:00\"}}",
+                            "name": "Inventory service down"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"error\": {\"code\": \"NOT_FOUND\", \"message\": \"Product not found.\", \"details\": {}}}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Orders",
+            "description": "",
+            "item": [
+                {
+                    "name": "Place an order",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/orders",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/orders"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"items\":[{\"product_id\":6,\"quantity\":2}]}"
+                        },
+                        "description": "One call to the inventory service reserves **every** item (all or nothing).\nPrices always come from the database: any price sent by the client is ignored.\nIf saving the order fails after the reservation, the stock is given back.\nLimited to 10 orders per minute per user."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\": {\"id\": 1, \"status\": \"pending\", \"total\": \"53.50\", \"items\": [{\"product_id\": 6, \"name\": \"Cotton T-Shirt\", \"unit_price\": \"12.00\", \"quantity\": 2, \"line_total\": \"24.00\"}, {\"product_id\": 2, \"name\": \"USB-C Charger 65W\", \"unit_price\": \"29.50\", \"quantity\": 1, \"line_total\": \"29.50\"}], \"created_at\": \"2026-11-04T20:24:14+00:00\", \"updated_at\": \"2026-11-04T20:24:14+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 409,
+                            "body": "{\"error\": {\"code\": \"INSUFFICIENT_STOCK\", \"message\": \"Some products do not have enough stock.\", \"details\": {\"items\": [{\"product_id\": 3, \"name\": \"Smart Watch\", \"requested\": 2, \"available\": 1}]}}}",
+                            "name": "Not enough stock (no order created)"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"error\": {\"code\": \"VALIDATION_FAILED\", \"message\": \"The given data was invalid.\", \"details\": {\"items.0.quantity\": [\"The items.0.quantity field must be at least 1.\"]}}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\": {\"code\": \"INVENTORY_UNAVAILABLE\", \"message\": \"The inventory service is not available right now. Please try again later.\", \"details\": {}}}",
+                            "name": "Inventory service down (no order created)"
+                        }
+                    ]
+                },
+                {
+                    "name": "List orders",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/orders",
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "pending",
+                                    "description": "One of pending, confirmed, shipped, delivered, cancelled.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10",
+                                    "description": "Between 1 and 50 (default 15).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/orders?status=pending&per_page=10&page=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"confirmed\",\"per_page\":1,\"page\":22}"
+                        },
+                        "description": "A customer gets **only their own** orders. An admin gets every order, plus `customer` and `next_statuses`."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": [{\"id\": 1, \"status\": \"pending\", \"total\": \"53.50\", \"items_count\": 2, \"created_at\": \"2026-11-04T20:24:14+00:00\", \"updated_at\": \"2026-11-04T20:24:14+00:00\"}], \"links\": {\"first\": \"http:\/\/localhost:8000\/api\/v1\/orders?page=1\", \"last\": \"http:\/\/localhost:8000\/api\/v1\/orders?page=1\", \"prev\": null, \"next\": null}, \"meta\": {\"current_page\": 1, \"from\": 1, \"last_page\": 1, \"path\": \"http:\/\/localhost:8000\/api\/v1\/orders\", \"per_page\": 15, \"to\": 1, \"total\": 1}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Order details",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/orders\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/orders\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": 16,
+                                    "description": "The ID of the order."
+                                },
+                                {
+                                    "id": "order",
+                                    "key": "order",
+                                    "value": 1,
+                                    "description": "The order id."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Only the owner or an admin. **Another customer's order returns 403.**"
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 1, \"status\": \"pending\", \"total\": \"53.50\", \"items\": [{\"product_id\": 6, \"name\": \"Cotton T-Shirt\", \"unit_price\": \"12.00\", \"quantity\": 2, \"line_total\": \"24.00\"}, {\"product_id\": 2, \"name\": \"USB-C Charger 65W\", \"unit_price\": \"29.50\", \"quantity\": 1, \"line_total\": \"29.50\"}], \"created_at\": \"2026-11-04T20:24:14+00:00\", \"updated_at\": \"2026-11-04T20:24:14+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"error\": {\"code\": \"FORBIDDEN\", \"message\": \"You are not allowed to view this order.\", \"details\": {}}}",
+                            "name": "Someone else's order"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"error\": {\"code\": \"NOT_FOUND\", \"message\": \"Order not found.\", \"details\": {}}}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "description": "",
+            "item": [
+                {
+                    "name": "List notifications",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications",
+                            "query": [
+                                {
+                                    "key": "unread",
+                                    "value": "1",
+                                    "description": "Only unread notifications.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20",
+                                    "description": "Between 1 and 50 (default 15).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications?unread=1&per_page=20&page=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"unread\":true,\"per_page\":1,\"page\":22}"
+                        },
+                        "description": "Newest first. `meta.unread_count` holds the number of unread notifications.\nTypes: `order.placed` (customer), `order.new` (admins), `order.status_changed` (order owner)."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": [{\"id\": \"cc7922f8-ea17-4c01-be34-d5838f904b94\", \"type\": \"order.status_changed\", \"title\": \"Order confirmed\", \"message\": \"Your order #4 has been confirmed.\", \"payload\": {\"order_id\": 4, \"status\": \"confirmed\", \"previous_status\": \"pending\"}, \"read\": false, \"read_at\": null, \"created_at\": \"2026-11-04T20:40:53+00:00\"}, {\"id\": \"87701cfe-f4f0-4504-a9fe-fd3cd1398230\", \"type\": \"order.placed\", \"title\": \"Order received\", \"message\": \"Your order #4 has been received. Total: 35.00.\", \"payload\": {\"order_id\": 4, \"status\": \"pending\", \"total\": \"35.00\"}, \"read\": false, \"read_at\": null, \"created_at\": \"2026-11-04T20:40:47+00:00\"}], \"links\": {\"first\": \"http:\/\/localhost:8000\/api\/v1\/notifications?page=1\", \"last\": \"http:\/\/localhost:8000\/api\/v1\/notifications?page=1\", \"prev\": null, \"next\": null}, \"meta\": {\"current_page\": 1, \"from\": 1, \"last_page\": 1, \"path\": \"http:\/\/localhost:8000\/api\/v1\/notifications\", \"per_page\": 15, \"to\": 2, \"total\": 2, \"unread_count\": 2}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Unread count",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications\/unread-count",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications\/unread-count"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "A cheap call for the badge on the bell icon."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"unread_count\": 2}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Mark all as read",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications\/read-all",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications\/read-all"
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"marked_as_read\": 2}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Mark as read",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/notifications\/:id\/read",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/notifications\/:id\/read",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "cc7922f8-ea17-4c01-be34-d5838f904b94",
+                                    "description": "The notification id (UUID)."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Someone else's notification returns 404."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": \"cc7922f8-ea17-4c01-be34-d5838f904b94\", \"type\": \"order.status_changed\", \"title\": \"Order confirmed\", \"message\": \"Your order #4 has been confirmed.\", \"payload\": {\"order_id\": 4, \"status\": \"confirmed\", \"previous_status\": \"pending\"}, \"read\": true, \"read_at\": \"2026-11-04T20:45:00+00:00\", \"created_at\": \"2026-11-04T20:40:53+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"error\": {\"code\": \"NOT_FOUND\", \"message\": \"Notification not found.\", \"details\": {}}}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Administration",
+            "description": "",
+            "item": [
+                {
+                    "name": "Create a category",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/categories",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/categories"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"Toys & Games\"}"
+                        },
+                        "description": "**Admin only.** The slug is generated from the name."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\": {\"id\": 4, \"name\": \"Toys & Games\", \"slug\": \"toys-games\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"error\": {\"code\": \"FORBIDDEN\", \"message\": \"This action is reserved for administrators.\", \"details\": {}}}",
+                            "name": "Customer token"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"error\": {\"code\": \"VALIDATION_FAILED\", \"message\": \"The given data was invalid.\", \"details\": {\"name\": [\"The name has already been taken.\"]}}}",
+                            "name": "Name taken"
+                        }
+                    ]
+                },
+                {
+                    "name": "Create a product",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/products",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/products"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "category_id",
+                                    "value": "1",
+                                    "type": "text",
+                                    "description": "An existing category."
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "Gaming Mouse",
+                                    "type": "text",
+                                    "description": ""
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "RGB mouse",
+                                    "type": "text",
+                                    "description": ""
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "25.5",
+                                    "type": "text",
+                                    "description": "Greater than 0, up to 2 decimals."
+                                },
+                                {
+                                    "key": "quantity",
+                                    "value": "5",
+                                    "type": "text",
+                                    "description": "Initial stock (0 or more)."
+                                },
+                                {
+                                    "key": "image",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "**Admin only.** `multipart\/form-data` with the image. The initial quantity is sent to the inventory service;\nif that fails nothing is saved (no product row, no image) and 503 is returned."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\": {\"id\": 8, \"name\": \"Gaming Mouse\", \"description\": \"RGB mouse\", \"price\": \"25.50\", \"image_url\": \"http:\/\/localhost:8000\/storage\/products\/SizurDJW4OgLiAJsDCvmDcSQbpIPE0mdLif8Yjlh.png\", \"category\": {\"id\": 1, \"name\": \"Electronics\", \"slug\": \"electronics\"}, \"stock\": {\"quantity\": 5, \"status\": \"in_stock\"}, \"created_at\": \"2026-11-04T19:51:54+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"error\": {\"code\": \"FORBIDDEN\", \"message\": \"This action is reserved for administrators.\", \"details\": {}}}",
+                            "name": "Customer token"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"error\": {\"code\": \"VALIDATION_FAILED\", \"message\": \"The given data was invalid.\", \"details\": {\"image\": [\"The image field must be an image.\"]}}}",
+                            "name": "Not an image"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\": {\"code\": \"INVENTORY_UNAVAILABLE\", \"message\": \"The inventory service is not available right now. Please try again later.\", \"details\": {}}}",
+                            "name": "Inventory service down"
+                        }
+                    ]
+                },
+                {
+                    "name": "Set product stock",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/products\/:product_id\/stock",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/products\/:product_id\/stock",
+                            "variable": [
+                                {
+                                    "id": "product_id",
+                                    "key": "product_id",
+                                    "value": 16,
+                                    "description": "The ID of the product."
+                                },
+                                {
+                                    "id": "product",
+                                    "key": "product",
+                                    "value": 1,
+                                    "description": "The product id."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"quantity\":20}"
+                        },
+                        "description": "**Admin only.** Sets the absolute quantity in the inventory service."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 1, \"name\": \"Wireless Headphones\", \"description\": \"Over-ear Bluetooth headphones with noise cancelling.\", \"price\": \"79.99\", \"image_url\": null, \"category\": {\"id\": 1, \"name\": \"Electronics\", \"slug\": \"electronics\"}, \"stock\": {\"quantity\": 20, \"status\": \"in_stock\"}, \"created_at\": \"2026-11-04T19:50:03+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\": {\"code\": \"INVENTORY_UNAVAILABLE\", \"message\": \"The inventory service is not available right now. Please try again later.\", \"details\": {}}}",
+                            "name": "Inventory service down"
+                        }
+                    ]
+                },
+                {
+                    "name": "Change order status",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/v1\/orders\/:order_id\/status",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/v1\/orders\/:order_id\/status",
+                            "variable": [
+                                {
+                                    "id": "order_id",
+                                    "key": "order_id",
+                                    "value": 16,
+                                    "description": "The ID of the order."
+                                },
+                                {
+                                    "id": "order",
+                                    "key": "order",
+                                    "value": 1,
+                                    "description": "The order id."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"confirmed\"}"
+                        },
+                        "description": "**Admin only** (a customer gets 403, even on their own order).\nAllowed: pending \u2192 confirmed | cancelled, confirmed \u2192 shipped | cancelled, shipped \u2192 delivered.\nCancelling gives the stock back to the inventory service. The customer is notified."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 1, \"status\": \"confirmed\", \"total\": \"53.50\", \"items\": [{\"product_id\": 6, \"name\": \"Cotton T-Shirt\", \"unit_price\": \"12.00\", \"quantity\": 2, \"line_total\": \"24.00\"}], \"customer\": {\"id\": 2, \"name\": \"Test Customer\", \"email\": \"customer@store.test\"}, \"next_statuses\": [\"shipped\", \"cancelled\"], \"created_at\": \"2026-11-04T20:24:14+00:00\", \"updated_at\": \"2026-11-04T20:30:00+00:00\"}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"error\": {\"code\": \"FORBIDDEN\", \"message\": \"This action is reserved for administrators.\", \"details\": {}}}",
+                            "name": "Customer token"
+                        },
+                        {
+                            "header": [],
+                            "code": 409,
+                            "body": "{\"error\": {\"code\": \"INVALID_STATUS_TRANSITION\", \"message\": \"An order cannot move from 'delivered' to 'cancelled'.\", \"details\": {\"current\": \"delivered\", \"allowed\": []}}}",
+                            "name": "Transition not allowed"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "Authorization",
+                "type": "string"
+            }
+        ]
+    }
+}

@@ -13,6 +13,7 @@
 | [03-products.md](03-products.md) | التصنيفات، المنتجات، الصور، التصفية، تقسيم الصفحات، المخزون |
 | [04-orders.md](04-orders.md) | إنشاء الطلب، عرض الطلبات، تغيير الحالة، حالات الرفض |
 | [05-notifications.md](05-notifications.md) | الإشعارات، عدد غير المقروء، تعليمها كمقروءة |
+| [06-api-docs.md](06-api-docs.md) | التوثيق التفاعلي: `/docs` و Swagger و Postman Collection جاهزة |
 
 ---
 

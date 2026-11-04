@@ -12,7 +12,17 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    /** GET /api/v1/categories */
+    /**
+     * List categories
+     *
+     * Use `id` as `category_id` to filter products.
+     *
+     * @group Catalogue
+     *
+     * @unauthenticated
+     *
+     * @response 200 {"data": [{"id": 2, "name": "Books", "slug": "books", "products_count": 2}, {"id": 3, "name": "Clothing", "slug": "clothing", "products_count": 2}, {"id": 1, "name": "Electronics", "slug": "electronics", "products_count": 3}]}
+     */
     public function index(): AnonymousResourceCollection
     {
         return CategoryResource::collection(
@@ -20,7 +30,21 @@ class CategoryController extends Controller
         );
     }
 
-    /** POST /api/v1/categories (admin) */
+    /**
+     * Create a category
+     *
+     * **Admin only.** The slug is generated from the name.
+     *
+     * @group Administration
+     *
+     * @authenticated
+     *
+     * @bodyParam name string required Unique, up to 100 characters. Example: Toys & Games
+     *
+     * @response 201 {"data": {"id": 4, "name": "Toys & Games", "slug": "toys-games"}}
+     * @response 403 scenario="Customer token" {"error": {"code": "FORBIDDEN", "message": "This action is reserved for administrators.", "details": {}}}
+     * @response 422 scenario="Name taken" {"error": {"code": "VALIDATION_FAILED", "message": "The given data was invalid.", "details": {"name": ["The name has already been taken."]}}}
+     */
     public function store(StoreCategoryRequest $request): JsonResponse
     {
         $name = $request->validated('name');

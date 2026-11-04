@@ -1,0 +1,299 @@
+name: Orders
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/orders
+    metadata:
+      custom: []
+      groupName: Orders
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Place an order'
+      description: |-
+        One call to the inventory service reserves **every** item (all or nothing).
+        Prices always come from the database: any price sent by the client is ignored.
+        If saving the order fails after the reservation, the stock is given back.
+        Limited to 10 orders per minute per user.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_JWT_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      items:
+        custom: []
+        name: items
+        description: 'From 1 to 20 items, each product only once.'
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'items[].product_id':
+        custom: []
+        name: 'items[].product_id'
+        description: 'An existing product.'
+        required: true
+        example: 6
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      'items[].quantity':
+        custom: []
+        name: 'items[].quantity'
+        description: 'From 1 to 100.'
+        required: true
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      items:
+        -
+          product_id: 6
+          quantity: 2
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data": {"id": 1, "status": "pending", "total": "53.50", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 2, "line_total": "24.00"}, {"product_id": 2, "name": "USB-C Charger 65W", "unit_price": "29.50", "quantity": 1, "line_total": "29.50"}], "created_at": "2026-11-04T20:24:14+00:00", "updated_at": "2026-11-04T20:24:14+00:00"}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 409
+        content: '{"error": {"code": "INSUFFICIENT_STOCK", "message": "Some products do not have enough stock.", "details": {"items": [{"product_id": 3, "name": "Smart Watch", "requested": 2, "available": 1}]}}}'
+        headers: []
+        description: 'Not enough stock (no order created)'
+      -
+        custom: []
+        status: 422
+        content: '{"error": {"code": "VALIDATION_FAILED", "message": "The given data was invalid.", "details": {"items.0.quantity": ["The items.0.quantity field must be at least 1."]}}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 503
+        content: '{"error": {"code": "INVENTORY_UNAVAILABLE", "message": "The inventory service is not available right now. Please try again later.", "details": {}}}'
+        headers: []
+        description: 'Inventory service down (no order created)'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/orders
+    metadata:
+      custom: []
+      groupName: Orders
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List orders'
+      description: 'A customer gets **only their own** orders. An admin gets every order, plus `customer` and `next_statuses`.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_JWT_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      status:
+        custom: []
+        name: status
+        description: 'One of pending, confirmed, shipped, delivered, cancelled.'
+        required: false
+        example: pending
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Between 1 and 50 (default 15).'
+        required: false
+        example: 10
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: ''
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      status: pending
+      per_page: 10
+      page: 1
+    bodyParameters:
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: confirmed
+        type: string
+        enumValues:
+          - pending
+          - confirmed
+          - shipped
+          - delivered
+          - cancelled
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Must be at least 1. Must not be greater than 50.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'Must be at least 1.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      status: confirmed
+      per_page: 1
+      page: 22
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"id": 1, "status": "pending", "total": "53.50", "items_count": 2, "created_at": "2026-11-04T20:24:14+00:00", "updated_at": "2026-11-04T20:24:14+00:00"}], "links": {"first": "http://localhost:8000/api/v1/orders?page=1", "last": "http://localhost:8000/api/v1/orders?page=1", "prev": null, "next": null}, "meta": {"current_page": 1, "from": 1, "last_page": 1, "path": "http://localhost:8000/api/v1/orders", "per_page": 15, "to": 1, "total": 1}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/orders/{id}'
+    metadata:
+      custom: []
+      groupName: Orders
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Order details'
+      description: "Only the owner or an admin. **Another customer's order returns 403.**"
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_JWT_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the order.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      order:
+        custom: []
+        name: order
+        description: 'The order id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 16
+      order: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"id": 1, "status": "pending", "total": "53.50", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 2, "line_total": "24.00"}, {"product_id": 2, "name": "USB-C Charger 65W", "unit_price": "29.50", "quantity": 1, "line_total": "29.50"}], "created_at": "2026-11-04T20:24:14+00:00", "updated_at": "2026-11-04T20:24:14+00:00"}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"error": {"code": "FORBIDDEN", "message": "You are not allowed to view this order.", "details": {}}}'
+        headers: []
+        description: "Someone else's order"
+      -
+        custom: []
+        status: 404
+        content: '{"error": {"code": "NOT_FOUND", "message": "Order not found.", "details": {}}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
