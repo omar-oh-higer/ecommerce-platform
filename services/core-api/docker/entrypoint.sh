@@ -5,6 +5,13 @@ set -e
 
 cd /var/www/html
 
+# The queue worker reuses this image. The core-api container already prepared the app
+# (docker-compose starts the worker only once core-api is healthy), so just run the command.
+if [ "${CONTAINER_ROLE}" = "worker" ]; then
+    echo "[queue-worker] Starting: $*"
+    exec "$@"
+fi
+
 echo "[core-api] Preparing the application..."
 
 # 1. PHP dependencies (first run, or after composer.lock changed).

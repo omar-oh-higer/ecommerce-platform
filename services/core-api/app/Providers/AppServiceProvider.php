@@ -39,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(5)
             ->by(Str::lower((string) $request->input('email')).'|'.$request->ip()));
 
+        // Placing orders: 10 per minute per user (each one hits the inventory service).
+        RateLimiter::for('orders', fn (Request $request) => Limit::perMinute(10)
+            ->by($request->user()?->id ?: $request->ip()));
+
         // Registration: 10 accounts per minute per IP.
         RateLimiter::for('register', fn (Request $request) => Limit::perMinute(10)
             ->by($request->ip()));
