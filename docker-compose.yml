@@ -57,7 +57,7 @@ services:
 
   # Background jobs (e.g. retrying a stock release when the inventory service was down).
   # Same image and code as core-api; starts once core-api has prepared the app.
-  # After `git pull` run: docker compose up -d --build --force-recreate core-api queue-worker
+  # After `git pull` run: docker compose up -d --build --force-recreate
   # (core-api applies new migrations on start; the worker must reload the code).
   queue-worker:
     build:
@@ -92,5 +92,49 @@ services:
       retries: 30
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # Inventory service (requirement 2): a separate .NET 10 gRPC service with its
+  # own PostgreSQL database. core-api only reaches it through proto/inventory.proto.
+  # ---------------------------------------------------------------------------
+  inventory-service:
+    build:
+      context: .
+      dockerfile: services/inventory-service/Dockerfile
+    environment:
+      ConnectionStrings__Inventory: Host=inventory-db;Port=5432;Database=inventory;Username=inventory;Password=secret
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      # Exposed for testing with grpcurl / Postman from the host.
+      - "${INVENTORY_GRPC_PORT:-5001}:5001"
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+  # Inventory database (PostgreSQL) — used only by inventory-service.
+  inventory-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: inventory
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "${INVENTORY_DB_FORWARD_PORT:-5433}:5432"
+    volumes:
+      - inventory-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory -d inventory"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
 volumes:
   mysql-data:
+  inventory-data:
