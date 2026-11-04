@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shop_core/shop_core.dart';
 
 void main() {
+  orderTests();
   test('Money parses API strings without floating point', () {
     expect(Money.parse('12.00').cents, 1200);
     expect(Money.parse('79.99').cents, 7999);
@@ -44,5 +45,30 @@ void main() {
     }, Category.fromJson);
     expect(page.hasMore, isTrue);
     expect(page.total, 7);
+  });
+}
+
+void orderTests() {
+  test('Order list item uses items_count, detail uses items', () {
+    final list = Order.fromJson({
+      'id': 1, 'status': 'pending', 'total': '53.50', 'items_count': 2,
+      'created_at': '2026-11-04T20:24:14+00:00',
+    });
+    expect(list.itemsCount, 2);
+    expect(list.items, isEmpty);
+    expect(list.nextStatuses, isEmpty);
+
+    final detail = Order.fromJson({
+      'id': 1, 'status': 'confirmed', 'total': '53.50',
+      'items': [
+        {'product_id': 6, 'name': 'T', 'unit_price': '12.00', 'quantity': 2, 'line_total': '24.00'}
+      ],
+      'customer': {'id': 2, 'name': 'C', 'email': 'c@x.y'},
+      'next_statuses': ['shipped', 'cancelled'],
+    });
+    expect(detail.itemsCount, 1);
+    expect(detail.items.single.lineTotal.cents, 2400);
+    expect(detail.nextStatuses, [OrderStatus.shipped, OrderStatus.cancelled]);
+    expect(detail.customer?.email, 'c@x.y');
   });
 }

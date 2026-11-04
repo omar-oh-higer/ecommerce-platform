@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../catalog/product_widgets.dart';
 import 'cart_cubit.dart';
@@ -59,8 +60,13 @@ class CartPage extends StatelessWidget {
                       Text(s.total.toString(), style: Theme.of(context).textTheme.titleLarge),
                     ]),
                     const SizedBox(height: 12),
-                    // Checkout arrives with the orders step.
-                    const FilledButton(onPressed: null, child: Text('Checkout (coming next)')),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: () => context.push('/checkout'),
+                        child: const Text('Checkout'),
+                      ),
+                    ),
                   ]),
                 ),
               ),

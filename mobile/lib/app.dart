@@ -9,6 +9,11 @@ import 'features/auth/login_page.dart';
 import 'features/auth/register_page.dart';
 import 'features/cart/cart_cubit.dart';
 import 'features/cart/cart_page.dart';
+import 'features/orders/checkout_cubit.dart';
+import 'features/orders/checkout_page.dart';
+import 'features/orders/order_detail_page.dart';
+import 'features/orders/orders_cubit.dart';
+import 'features/orders/orders_page.dart';
 import 'features/catalog/product_detail_page.dart';
 import 'features/catalog/products_cubit.dart';
 import 'features/catalog/products_page.dart';
@@ -20,11 +25,13 @@ class ShopApp extends StatefulWidget {
     required this.config,
     required this.api,
     required this.catalog,
+    required this.orders,
     required this.cart,
     required this.products,
   });
 
   final CatalogRepository catalog;
+  final OrdersRepository orders;
   final CartCubit cart;
   final ProductsCubit products;
   final AuthCubit auth;
@@ -45,6 +52,7 @@ class _ShopAppState extends State<ShopApp> {
         RepositoryProvider.value(value: widget.api),
         RepositoryProvider.value(value: widget.config),
         RepositoryProvider.value(value: widget.catalog),
+        RepositoryProvider.value(value: widget.orders),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -91,6 +99,24 @@ GoRouter _buildRouter(AuthCubit auth) {
             ProductDetailPage(productId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(path: '/cart', builder: (_, _) => const CartPage()),
+      GoRoute(
+        path: '/checkout',
+        builder: (context, _) => BlocProvider(
+          create: (_) => CheckoutCubit(context.read<OrdersRepository>(), context.read<CartCubit>()),
+          child: const CheckoutPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/orders',
+        builder: (context, _) => BlocProvider(
+          create: (_) => OrdersCubit(context.read<OrdersRepository>())..load(),
+          child: const OrdersPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/orders/:id',
+        builder: (_, state) => OrderDetailPage(orderId: int.parse(state.pathParameters['id']!)),
+      ),
     ],
   );
 }
