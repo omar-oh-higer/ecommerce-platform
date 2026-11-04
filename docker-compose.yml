@@ -57,7 +57,8 @@ services:
 
   # Background jobs (e.g. retrying a stock release when the inventory service was down).
   # Same image and code as core-api; starts once core-api has prepared the app.
-  # After changing PHP code run: docker compose restart queue-worker
+  # After `git pull` run: docker compose up -d --build --force-recreate core-api queue-worker
+  # (core-api applies new migrations on start; the worker must reload the code).
   queue-worker:
     build:
       context: ./services/core-api

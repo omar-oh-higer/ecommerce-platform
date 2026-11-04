@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Events\OrderPlaced;
+use App\Events\OrderStatusChanged;
 use App\Exceptions\ApiException;
 use App\Jobs\ReleaseReservation;
 use App\Models\Order;
@@ -74,6 +76,9 @@ class OrderService
 
                 $order->items()->createMany($lines->all());
 
+                // Sent only once the transaction commits (ShouldDispatchAfterCommit).
+                OrderPlaced::dispatch($order);
+
                 return $order;
             });
         } catch (Throwable $e) {
@@ -102,7 +107,10 @@ class OrderService
                 );
             }
 
+            $from = $order->status;
             $order->update(['status' => $status]);
+
+            OrderStatusChanged::dispatch($order, $from);
 
             if ($status === OrderStatus::Cancelled) {
                 DB::afterCommit(fn () => $this->releaseOrRetry($order->reservation_id));

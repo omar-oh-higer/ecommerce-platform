@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 |
 |   auth.php     /auth/*           register, login, me, refresh, logout
 |   catalog.php  public browsing   categories, products
-|   customer.php logged-in users   place and follow orders
+|   customer.php logged-in users   place and follow orders, notifications
 |   admin.php    administrators    catalogue, stock and order status management
 |
 | Every route has a name (e.g. "auth.login", "admin.products.store"),
