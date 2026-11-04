@@ -3,8 +3,11 @@
 دليل لفريق Flutter لربط التطبيق مع الـ Backend (Laravel `core-api`).
 كل خطوة من الـ Backend لها ملف هنا، وفيه أوامر `curl` جاهزة للاستيراد في Postman.
 
+> **ابدأ من هنا:** [00-run-with-docker.md](00-run-with-docker.md) — تشغيل الـ Backend كاملاً بأمر واحد (يكفي Docker).
+
 | الملف | المحتوى |
 |---|---|
+| [00-run-with-docker.md](00-run-with-docker.md) | تشغيل المشروع على Docker (Mac/Windows) |
 | [01-api-basics.md](01-api-basics.md) | العنوان الأساسي، الترويسات، صيغة الأخطاء، رموز الحالة |
 | [02-auth.md](02-auth.md) | التسجيل، الدخول، التوكن، الخروج، الأدوار |
 
@@ -42,6 +45,16 @@ if (body.access_token) {
 ---
 
 ## تشغيل الـ Backend محلياً
+
+### الطريقة الأساسية: Docker (لا تحتاج PHP)
+
+```bash
+docker compose up -d --build
+```
+
+التفاصيل الكاملة وحل المشاكل: [00-run-with-docker.md](00-run-with-docker.md).
+
+### بديل: بدون Docker (لمن لديه PHP 8.4 و Composer)
 
 ```bash
 cd services/core-api
