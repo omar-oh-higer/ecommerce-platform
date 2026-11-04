@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +20,8 @@ Route::post('products', [ProductController::class, 'store'])->name('products.sto
 Route::patch('products/{product}/stock', [ProductController::class, 'updateStock'])
     ->whereNumber('product')
     ->name('products.stock.update');
+
+// Order management (only administrators change an order's status)
+Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])
+    ->whereNumber('order')
+    ->name('orders.status.update');

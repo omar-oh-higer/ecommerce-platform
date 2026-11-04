@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Route;
 |
 |   auth.php     /auth/*           register, login, me, refresh, logout
 |   catalog.php  public browsing   categories, products
-|   admin.php    administrators    catalogue and stock management
+|   customer.php logged-in users   place and follow orders
+|   admin.php    administrators    catalogue, stock and order status management
 |
 | Every route has a name (e.g. "auth.login", "admin.products.store"),
 | so `php artisan route:list` shows the whole API grouped and readable.
@@ -29,6 +30,10 @@ Route::prefix('auth')
 
 Route::name('catalog.')
     ->group(base_path('routes/api/v1/catalog.php'));
+
+Route::middleware('auth:api')
+    ->name('customer.')
+    ->group(base_path('routes/api/v1/customer.php'));
 
 Route::middleware(['auth:api', 'admin'])
     ->name('admin.')

@@ -9,6 +9,7 @@
 |---|---|---|
 | `nginx` | يستقبل الطلبات | `http://localhost:8000` |
 | `core-api` | تطبيق Laravel (PHP 8.4) | داخلي |
+| `queue-worker` | المهام في الخلفية (مثل إعادة محاولة إرجاع الكمية للمخزون) | داخلي |
 | `mysql` | قاعدة البيانات | `localhost:3307` (اختياري لأدوات مثل TablePlus) |
 
 ---
@@ -71,7 +72,7 @@ docker compose logs -f core-api
 ```bash
 docker compose ps
 ```
-يجب أن ترى `nginx` و `core-api` و `mysql` بحالة `Up` (و `healthy`).
+يجب أن ترى `nginx` و `core-api` و `queue-worker` و `mysql` بحالة `Up` (و `healthy`).
 
 ---
 

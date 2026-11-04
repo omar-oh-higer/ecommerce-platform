@@ -27,7 +27,7 @@ services:
       context: ./services/core-api
     volumes:
       - ./services/core-api:/var/www/html
-    environment:
+    environment: &core-api-env
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: http://localhost:${APP_PORT:-8000}
@@ -53,6 +53,23 @@ services:
       timeout: 3s
       retries: 120
       start_period: 30s
+    restart: unless-stopped
+
+  # Background jobs (e.g. retrying a stock release when the inventory service was down).
+  # Same image and code as core-api; starts once core-api has prepared the app.
+  # After changing PHP code run: docker compose restart queue-worker
+  queue-worker:
+    build:
+      context: ./services/core-api
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--max-time=3600"]
+    volumes:
+      - ./services/core-api:/var/www/html
+    environment:
+      <<: *core-api-env
+      CONTAINER_ROLE: worker
+    depends_on:
+      core-api:
+        condition: service_healthy
     restart: unless-stopped
 
   # Application database
