@@ -7,11 +7,26 @@ import 'package:shop_core/shop_core.dart';
 
 import 'features/auth/login_page.dart';
 import 'features/auth/register_page.dart';
-import 'features/home/home_page.dart';
+import 'features/cart/cart_cubit.dart';
+import 'features/cart/cart_page.dart';
+import 'features/catalog/product_detail_page.dart';
+import 'features/catalog/products_cubit.dart';
+import 'features/catalog/products_page.dart';
 
 class ShopApp extends StatefulWidget {
-  const ShopApp({super.key, required this.auth, required this.config, required this.api});
+  const ShopApp({
+    super.key,
+    required this.auth,
+    required this.config,
+    required this.api,
+    required this.catalog,
+    required this.cart,
+    required this.products,
+  });
 
+  final CatalogRepository catalog;
+  final CartCubit cart;
+  final ProductsCubit products;
   final AuthCubit auth;
   final ApiConfig config;
   final ApiClient api;
@@ -25,10 +40,18 @@ class _ShopAppState extends State<ShopApp> {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: widget.api,
-      child: BlocProvider.value(
-        value: widget.auth,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: widget.api),
+        RepositoryProvider.value(value: widget.config),
+        RepositoryProvider.value(value: widget.catalog),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: widget.auth),
+          BlocProvider.value(value: widget.cart),
+          BlocProvider.value(value: widget.products),
+        ],
         child: MaterialApp.router(
           title: 'Shop',
           debugShowCheckedModeBanner: false,
@@ -61,7 +84,13 @@ GoRouter _buildRouter(AuthCubit auth) {
       GoRoute(path: '/splash', builder: (_, _) => const _Splash()),
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterPage()),
-      GoRoute(path: '/', builder: (_, _) => const HomePage()),
+      GoRoute(path: '/', builder: (_, _) => const ProductsPage()),
+      GoRoute(
+        path: '/products/:id',
+        builder: (_, state) =>
+            ProductDetailPage(productId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(path: '/cart', builder: (_, _) => const CartPage()),
     ],
   );
 }
