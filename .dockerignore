@@ -1,0 +1,10 @@
+# Build context of the inventory service is the repository root.
+# Keep it small: send only what the .NET build needs.
+.git
+docs
+mobile
+services/core-api
+**/bin
+**/obj
+**/.vs
+**/.idea

@@ -10,6 +10,8 @@
 | `nginx` | يستقبل الطلبات | `http://localhost:8000` |
 | `core-api` | تطبيق Laravel (PHP 8.4) | داخلي |
 | `queue-worker` | المهام في الخلفية (مثل إعادة محاولة إرجاع الكمية للمخزون) | داخلي |
+| `inventory-service` | خدمة المستودع (.NET 10 gRPC) | `localhost:5001` (gRPC) |
+| `inventory-db` | قاعدة بيانات المستودع (PostgreSQL) | `localhost:5433` (اختياري) |
 | `mysql` | قاعدة البيانات | `localhost:3307` (اختياري لأدوات مثل TablePlus) |
 
 ---
@@ -72,7 +74,7 @@ docker compose logs -f core-api
 ```bash
 docker compose ps
 ```
-يجب أن ترى `nginx` و `core-api` و `queue-worker` و `mysql` بحالة `Up` (و `healthy`).
+يجب أن ترى `nginx` و `core-api` و `queue-worker` و `mysql` و `inventory-service` و `inventory-db` بحالة `Up` (و `healthy`).
 
 ---
 
@@ -138,7 +140,7 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 | أشغّل المشروع | `docker compose up -d` |
 | أوقف المشروع (البيانات تبقى) | `docker compose down` |
 | أرى السجلات والأخطاء | `docker compose logs -f core-api` |
-| **أحدّث بعد تعديلات زميلي** | `git pull` ثم `docker compose up -d --build --force-recreate core-api queue-worker` |
+| **أحدّث بعد تعديلات زميلي** | `git pull` ثم `docker compose up -d --build --force-recreate` |
 | أرجع القاعدة للحالة الأولى (تُحذف كل البيانات) | `docker compose down -v` ثم `docker compose up -d` |
 | أشغّل اختبارات الـ Backend | `docker compose exec core-api php artisan test` |
 | أنفّذ أمر Laravel | `docker compose exec core-api php artisan <command>` |
@@ -146,10 +148,10 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 ### بعد كل `git pull`
 ```bash
 git pull
-docker compose up -d --build --force-recreate core-api queue-worker
+docker compose up -d --build --force-recreate
 ```
 حاوية `core-api` تطبّق الجداول الجديدة (migrations) والمكتبات الجديدة **عند بدء تشغيلها فقط**.
-`--force-recreate` يضمن إعادة تشغيلها حتى لو لم تتغير الصورة، وإعادة تشغيل `queue-worker` حتى يقرأ الكود الجديد.
+`--build` يبني أي حاوية جديدة أو تغيّر كودها (مثل خدمة المستودع)، و `--force-recreate` يعيد تشغيل كل الحاويات حتى تطبّق التعديلات ويقرأ `queue-worker` الكود الجديد.
 بدونه قد ترى خطأ مثل `Table '...' doesn't exist`. قاعدة البيانات لا تتأثر (بياناتك تبقى).
 
 ---
