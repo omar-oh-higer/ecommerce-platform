@@ -1,7 +1,21 @@
+# Environment
 .env
 *.log
+
+# IDEs
 .idea/
 .vs/
 .vscode/
+
+# .NET
 **/bin/
 **/obj/
+*.user
+
+# PHP / Laravel (Laravel adds its own .gitignore inside core-api)
+**/vendor/
+**/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
