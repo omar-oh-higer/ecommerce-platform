@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,4 +24,16 @@ Route::prefix('auth')->group(function () {
         Route::post('refresh', [AuthController::class, 'refresh']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
+});
+
+// Catalogue: anyone can browse.
+Route::get('categories', [CategoryController::class, 'index']);
+Route::get('products', [ProductController::class, 'index']);
+Route::get('products/{product}', [ProductController::class, 'show'])->whereNumber('product');
+
+// Catalogue management: administrators only.
+Route::middleware(['auth:api', 'admin'])->group(function () {
+    Route::post('categories', [CategoryController::class, 'store']);
+    Route::post('products', [ProductController::class, 'store']);
+    Route::patch('products/{product}/stock', [ProductController::class, 'updateStock'])->whereNumber('product');
 });

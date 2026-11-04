@@ -28,6 +28,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Inventory service (see proto/inventory.proto).
+    'inventory' => [
+        // "fake" until the .NET gRPC service is connected, then "grpc".
+        'driver' => env('INVENTORY_DRIVER', 'fake'),
+        // Only for the fake driver: simulate the service being down.
+        'fake_down' => (bool) env('INVENTORY_FAKE_DOWN', false),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

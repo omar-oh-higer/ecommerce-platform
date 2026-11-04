@@ -2,17 +2,26 @@
 
 namespace App\Providers;
 
+use App\Services\Inventory\FakeInventoryClient;
+use App\Services\Inventory\InventoryClient;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Which inventory implementation the app uses (config/services.php → inventory.driver).
+        $this->app->singleton(InventoryClient::class, function ($app) {
+            return match (config('services.inventory.driver')) {
+                'fake' => new FakeInventoryClient($app['cache']->store(), (bool) config('services.inventory.fake_down')),
+                default => throw new InvalidArgumentException('Unknown inventory driver: '.config('services.inventory.driver')),
+            };
+        });
     }
 
     public function boot(): void

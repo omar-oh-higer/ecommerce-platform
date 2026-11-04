@@ -39,6 +39,10 @@ services:
       DB_USERNAME: ecommerce
       DB_PASSWORD: secret
       LOG_CHANNEL: stderr
+      # Until the .NET service is connected the app uses a built-in fake inventory.
+      # Demo "inventory is down":  INVENTORY_FAKE_DOWN=true docker compose up -d
+      INVENTORY_DRIVER: ${INVENTORY_DRIVER:-fake}
+      INVENTORY_FAKE_DOWN: ${INVENTORY_FAKE_DOWN:-false}
     depends_on:
       mysql:
         condition: service_healthy

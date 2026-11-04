@@ -3,11 +3,13 @@
 namespace App\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 /**
@@ -64,7 +66,14 @@ class ApiExceptionRenderer
             return self::json(401, 'INVALID_TOKEN', 'The token is invalid or has expired.');
         }
 
-        // Covers 403 (authorization), 404 (missing model/route), 405, 429 (throttle), ...
+        // Missing record: "Product not found." instead of the internal class name.
+        if ($e instanceof NotFoundHttpException && $e->getPrevious() instanceof ModelNotFoundException) {
+            $model = class_basename($e->getPrevious()->getModel());
+
+            return self::json(404, self::CODES[404], "{$model} not found.");
+        }
+
+        // Covers 403 (authorization), 404 (missing route), 405, 429 (throttle), ...
         if ($e instanceof HttpExceptionInterface) {
             $status = $e->getStatusCode();
             $message = $e->getMessage() !== '' ? $e->getMessage() : self::defaultMessage($status);
