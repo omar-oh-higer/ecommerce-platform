@@ -1,0 +1,376 @@
+name: Administration
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/categories
+    metadata:
+      custom: []
+      groupName: Administration
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create a category'
+      description: '**Admin only.** The slug is generated from the name.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_JWT_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Unique, up to 100 characters.'
+        required: true
+        example: 'Toys & Games'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: 'Toys & Games'
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data": {"id": 4, "name": "Toys & Games", "slug": "toys-games"}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"error": {"code": "FORBIDDEN", "message": "This action is reserved for administrators.", "details": {}}}'
+        headers: []
+        description: 'Customer token'
+      -
+        custom: []
+        status: 422
+        content: '{"error": {"code": "VALIDATION_FAILED", "message": "The given data was invalid.", "details": {"name": ["The name has already been taken."]}}}'
+        headers: []
+        description: 'Name taken'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/products
+    metadata:
+      custom: []
+      groupName: Administration
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create a product'
+      description: |-
+        **Admin only.** `multipart/form-data` with the image. The initial quantity is sent to the inventory service;
+        if that fails nothing is saved (no product row, no image) and 503 is returned.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_JWT_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      category_id:
+        custom: []
+        name: category_id
+        description: 'An existing category.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      name:
+        custom: []
+        name: name
+        description: ''
+        required: true
+        example: 'Gaming Mouse'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: ''
+        required: false
+        example: 'RGB mouse'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      price:
+        custom: []
+        name: price
+        description: 'Greater than 0, up to 2 decimals.'
+        required: true
+        example: 25.5
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      image:
+        custom: []
+        name: image
+        description: 'jpg, jpeg, png or webp, max 2 MB. SVG is refused.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      quantity:
+        custom: []
+        name: quantity
+        description: 'Initial stock (0 or more).'
+        required: true
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      category_id: 1
+      name: 'Gaming Mouse'
+      description: 'RGB mouse'
+      price: 25.5
+      quantity: 5
+    fileParameters:
+      image: null
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data": {"id": 8, "name": "Gaming Mouse", "description": "RGB mouse", "price": "25.50", "image_url": "http://localhost:8000/storage/products/SizurDJW4OgLiAJsDCvmDcSQbpIPE0mdLif8Yjlh.png", "category": {"id": 1, "name": "Electronics", "slug": "electronics"}, "stock": {"quantity": 5, "status": "in_stock"}, "created_at": "2026-11-04T19:51:54+00:00"}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"error": {"code": "FORBIDDEN", "message": "This action is reserved for administrators.", "details": {}}}'
+        headers: []
+        description: 'Customer token'
+      -
+        custom: []
+        status: 422
+        content: '{"error": {"code": "VALIDATION_FAILED", "message": "The given data was invalid.", "details": {"image": ["The image field must be an image."]}}}'
+        headers: []
+        description: 'Not an image'
+      -
+        custom: []
+        status: 503
+        content: '{"error": {"code": "INVENTORY_UNAVAILABLE", "message": "The inventory service is not available right now. Please try again later.", "details": {}}}'
+        headers: []
+        description: 'Inventory service down'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/v1/products/{product_id}/stock'
+    metadata:
+      custom: []
+      groupName: Administration
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Set product stock'
+      description: '**Admin only.** Sets the absolute quantity in the inventory service.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_JWT_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      product:
+        custom: []
+        name: product
+        description: 'The product id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 16
+      product: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      quantity:
+        custom: []
+        name: quantity
+        description: '0 or more.'
+        required: true
+        example: 20
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      quantity: 20
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"id": 1, "name": "Wireless Headphones", "description": "Over-ear Bluetooth headphones with noise cancelling.", "price": "79.99", "image_url": null, "category": {"id": 1, "name": "Electronics", "slug": "electronics"}, "stock": {"quantity": 20, "status": "in_stock"}, "created_at": "2026-11-04T19:50:03+00:00"}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 503
+        content: '{"error": {"code": "INVENTORY_UNAVAILABLE", "message": "The inventory service is not available right now. Please try again later.", "details": {}}}'
+        headers: []
+        description: 'Inventory service down'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/v1/orders/{order_id}/status'
+    metadata:
+      custom: []
+      groupName: Administration
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Change order status'
+      description: |-
+        **Admin only** (a customer gets 403, even on their own order).
+        Allowed: pending → confirmed | cancelled, confirmed → shipped | cancelled, shipped → delivered.
+        Cancelling gives the stock back to the inventory service. The customer is notified.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_JWT_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      order_id:
+        custom: []
+        name: order_id
+        description: 'The ID of the order.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      order:
+        custom: []
+        name: order
+        description: 'The order id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      order_id: 16
+      order: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      status:
+        custom: []
+        name: status
+        description: 'One of confirmed, shipped, delivered, cancelled.'
+        required: true
+        example: confirmed
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      status: confirmed
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"id": 1, "status": "confirmed", "total": "53.50", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 2, "line_total": "24.00"}], "customer": {"id": 2, "name": "Test Customer", "email": "customer@store.test"}, "next_statuses": ["shipped", "cancelled"], "created_at": "2026-11-04T20:24:14+00:00", "updated_at": "2026-11-04T20:30:00+00:00"}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 403
+        content: '{"error": {"code": "FORBIDDEN", "message": "This action is reserved for administrators.", "details": {}}}'
+        headers: []
+        description: 'Customer token'
+      -
+        custom: []
+        status: 409
+        content: '{"error": {"code": "INVALID_STATUS_TRANSITION", "message": "An order cannot move from ''delivered'' to ''cancelled''.", "details": {"current": "delivered", "allowed": []}}}'
+        headers: []
+        description: 'Transition not allowed'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

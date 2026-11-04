@@ -1,0 +1,256 @@
+name: Catalogue
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/categories
+    metadata:
+      custom: []
+      groupName: Catalogue
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List categories'
+      description: 'Use `id` as `category_id` to filter products.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"id": 2, "name": "Books", "slug": "books", "products_count": 2}, {"id": 3, "name": "Clothing", "slug": "clothing", "products_count": 2}, {"id": 1, "name": "Electronics", "slug": "electronics", "products_count": 3}]}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/products
+    metadata:
+      custom: []
+      groupName: Catalogue
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List products'
+      description: |-
+        Newest first, paginated. Stock is read from the inventory service in **one call for the whole page**.
+        If the inventory service is down the list still works and `stock.status` is `unavailable`.
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      category_id:
+        custom: []
+        name: category_id
+        description: 'Only products of this category.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      search:
+        custom: []
+        name: search
+        description: 'Search in the product name.'
+        required: false
+        example: jacket
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Between 1 and 50 (default 15).'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'Page number (default 1).'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      category_id: 1
+      search: jacket
+      per_page: 2
+      page: 1
+    bodyParameters:
+      category_id:
+        custom: []
+        name: category_id
+        description: 'Must match an existing stored value.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      search:
+        custom: []
+        name: search
+        description: 'Must not be greater than 100 characters.'
+        required: false
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Must be at least 1. Must not be greater than 50.'
+        required: false
+        example: 7
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'Must be at least 1.'
+        required: false
+        example: 66
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      category_id: 16
+      search: 'n'
+      per_page: 7
+      page: 66
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": [{"id": 7, "name": "Winter Jacket", "description": "Water-resistant jacket with hood.", "price": "89.00", "image_url": null, "category": {"id": 3, "name": "Clothing", "slug": "clothing"}, "stock": {"quantity": 8, "status": "in_stock"}, "created_at": "2026-11-04T19:50:03+00:00"}, {"id": 6, "name": "Cotton T-Shirt", "description": "100% cotton, regular fit.", "price": "12.00", "image_url": null, "category": {"id": 3, "name": "Clothing", "slug": "clothing"}, "stock": {"quantity": 100, "status": "in_stock"}, "created_at": "2026-11-04T19:50:03+00:00"}], "links": {"first": "http://localhost:8000/api/v1/products?per_page=2&page=1", "last": "http://localhost:8000/api/v1/products?per_page=2&page=4", "prev": null, "next": "http://localhost:8000/api/v1/products?per_page=2&page=2"}, "meta": {"current_page": 1, "from": 1, "last_page": 4, "path": "http://localhost:8000/api/v1/products", "per_page": 2, "to": 2, "total": 8}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"error": {"code": "VALIDATION_FAILED", "message": "The given data was invalid.", "details": {"per_page": ["The per page field must not be greater than 50."]}}}'
+        headers: []
+        description: 'Bad filters'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/products/{id}'
+    metadata:
+      custom: []
+      groupName: Catalogue
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Product details'
+      description: |-
+        The quantity is asked from the inventory service at request time.
+        `stock.status`: `in_stock`, `out_of_stock`, or `unavailable` (inventory service down, `quantity` is null).
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the product.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      product:
+        custom: []
+        name: product
+        description: 'The product id.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 16
+      product: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"id": 8, "name": "Gaming Mouse", "description": "RGB mouse", "price": "25.50", "image_url": "http://localhost:8000/storage/products/SizurDJW4OgLiAJsDCvmDcSQbpIPE0mdLif8Yjlh.png", "category": {"id": 1, "name": "Electronics", "slug": "electronics"}, "stock": {"quantity": 5, "status": "in_stock"}, "created_at": "2026-11-04T19:51:54+00:00"}}'
+        headers: []
+        description: Found
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"id": 8, "name": "Gaming Mouse", "description": "RGB mouse", "price": "25.50", "image_url": null, "category": {"id": 1, "name": "Electronics", "slug": "electronics"}, "stock": {"quantity": null, "status": "unavailable"}, "created_at": "2026-11-04T19:51:54+00:00"}}'
+        headers: []
+        description: 'Inventory service down'
+      -
+        custom: []
+        status: 404
+        content: '{"error": {"code": "NOT_FOUND", "message": "Product not found.", "details": {}}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
