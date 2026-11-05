@@ -30,11 +30,11 @@ class _RegisterPageState extends State<RegisterPage> {
   void _submit() {
     if (!_form.currentState!.validate()) return;
     context.read<AuthCubit>().register(
-          name: _name.text,
-          email: _email.text,
-          password: _password.text,
-          passwordConfirmation: _confirm.text,
-        );
+      name: _name.text,
+      email: _email.text,
+      password: _password.text,
+      passwordConfirmation: _confirm.text,
+    );
   }
 
   @override
@@ -46,9 +46,10 @@ class _RegisterPageState extends State<RegisterPage> {
     final fields = failure is ValidationFailure ? failure : null;
 
     InputDecoration deco(String label, String field) => InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        errorText: fields?.firstErrorFor(field));
+      labelText: label,
+      border: const OutlineInputBorder(),
+      errorText: fields?.firstErrorFor(field),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -74,16 +75,18 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _name,
                       textCapitalization: TextCapitalization.words,
                       decoration: deco('Name', 'name'),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Enter your name'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       decoration: deco('Email', 'email'),
-                      validator: (v) =>
-                          (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                      validator: (v) => (v == null || !v.contains('@'))
+                          ? 'Enter a valid email'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -91,7 +94,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       obscureText: true,
                       decoration: deco('Password', 'password'),
                       validator: (v) {
-                        if (v == null || v.length < 8) return 'At least 8 characters';
+                        if (v == null || v.length < 8)
+                          return 'At least 8 characters';
                         if (!RegExp(r'[A-Za-z]').hasMatch(v) ||
                             !RegExp(r'\d').hasMatch(v)) {
                           return 'Use letters and numbers';
@@ -103,7 +107,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _confirm,
                       obscureText: true,
-                      decoration: deco('Confirm password', 'password_confirmation'),
+                      decoration: deco(
+                        'Confirm password',
+                        'password_confirmation',
+                      ),
                       validator: (v) =>
                           v != _password.text ? 'Passwords do not match' : null,
                       onFieldSubmitted: (_) => loading ? null : _submit(),
@@ -115,7 +122,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2))
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : const Text('Create account'),
                     ),
                   ],

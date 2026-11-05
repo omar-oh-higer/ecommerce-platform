@@ -34,15 +34,18 @@ class StockBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (text, color) = switch (stock.status) {
       StockStatus.inStock => (
-          stock.quantity != null && stock.quantity! <= 5
-              ? 'Only ${stock.quantity} left'
-              : 'In stock',
-          Colors.green.shade700
-        ),
+        stock.quantity != null && stock.quantity! <= 5
+            ? 'Only ${stock.quantity} left'
+            : 'In stock',
+        Colors.green.shade700,
+      ),
       StockStatus.outOfStock => ('Out of stock', Colors.red.shade700),
       StockStatus.unavailable => ('Stock unavailable', Colors.orange.shade800),
     };
-    return Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12));
+    return Text(
+      text,
+      style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12),
+    );
   }
 }
 
@@ -54,20 +57,26 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(
-              failure is NetworkFailure || failure is ServiceUnavailableFailure
-                  ? Icons.cloud_off
-                  : Icons.error_outline,
-              size: 48,
-            ),
-            const SizedBox(height: 12),
-            Text(failure.message, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            FilledButton.tonal(onPressed: onRetry, child: const Text('Try again')),
-          ]),
-        ),
-      );
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            failure is NetworkFailure || failure is ServiceUnavailableFailure
+                ? Icons.cloud_off
+                : Icons.error_outline,
+            size: 48,
+          ),
+          const SizedBox(height: 12),
+          Text(failure.message, textAlign: TextAlign.center),
+          const SizedBox(height: 12),
+          FilledButton.tonal(
+            onPressed: onRetry,
+            child: const Text('Try again'),
+          ),
+        ],
+      ),
+    ),
+  );
 }

@@ -4,7 +4,7 @@ import 'package:shop_core/shop_core.dart';
 /// Keeps the JWT in the iOS Keychain / Android Keystore, never in plain prefs.
 class SecureTokenStorage implements TokenStorage {
   SecureTokenStorage([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   static const _key = 'access_token';
   final FlutterSecureStorage _storage;

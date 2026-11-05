@@ -47,8 +47,10 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Sign in',
-                        style: Theme.of(context).textTheme.headlineMedium),
+                    Text(
+                      'Sign in',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                     const SizedBox(height: 24),
                     if (expired) ...[
                       const SessionExpiredBanner(),
@@ -63,9 +65,12 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
                       decoration: const InputDecoration(
-                          labelText: 'Email', border: OutlineInputBorder()),
-                      validator: (v) =>
-                          (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (v) => (v == null || !v.contains('@'))
+                          ? 'Enter a valid email'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -73,9 +78,12 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
                       decoration: const InputDecoration(
-                          labelText: 'Password', border: OutlineInputBorder()),
-                      validator: (v) =>
-                          (v == null || v.isEmpty) ? 'Enter your password' : null,
+                        labelText: 'Password',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? 'Enter your password'
+                          : null,
                       onFieldSubmitted: (_) => loading ? null : _submit(),
                     ),
                     const SizedBox(height: 24),
@@ -85,7 +93,8 @@ class _LoginPageState extends State<LoginPage> {
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2))
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : const Text('Sign in'),
                     ),
                     TextButton(
