@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,6 +16,13 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->timestamp('stock_released_at')->nullable()->after('total');
         });
+
+        // Orders cancelled before this column existed had their stock returned when they were
+        // cancelled: mark them as released so they do not show "stock return pending".
+        DB::table('orders')
+            ->where('status', 'cancelled')
+            ->whereNull('stock_released_at')
+            ->update(['stock_released_at' => DB::raw('updated_at')]);
     }
 
     public function down(): void
