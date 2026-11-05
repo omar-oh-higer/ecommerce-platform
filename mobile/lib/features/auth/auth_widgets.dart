@@ -30,5 +30,6 @@ class SessionExpiredBanner extends StatelessWidget {
   const SessionExpiredBanner({super.key});
   @override
   Widget build(BuildContext context) => const FailureBanner(
-      UnauthenticatedFailure('Your session has expired. Please sign in again.'));
+    UnauthenticatedFailure('Your session has expired. Please sign in again.'),
+  );
 }

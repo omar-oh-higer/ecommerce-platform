@@ -36,36 +36,46 @@ class OrdersCubit extends Cubit<OrdersState> {
     await _fetch(reset: false, status: state.status);
   }
 
-  Future<void> filter(OrderStatus? status) => _fetch(reset: true, status: status);
+  Future<void> filter(OrderStatus? status) =>
+      _fetch(reset: true, status: status);
 
-  Future<void> _fetch({required bool reset, required OrderStatus? status}) async {
+  Future<void> _fetch({
+    required bool reset,
+    required OrderStatus? status,
+  }) async {
     final gen = ++_generation;
     final page = reset ? 1 : state.page + 1;
-    emit(OrdersState(
-      orders: reset ? const [] : state.orders,
-      status: status,
-      page: reset ? 0 : state.page,
-      hasMore: reset ? true : state.hasMore,
-      loading: true,
-    ));
+    emit(
+      OrdersState(
+        orders: reset ? const [] : state.orders,
+        status: status,
+        page: reset ? 0 : state.page,
+        hasMore: reset ? true : state.hasMore,
+        loading: true,
+      ),
+    );
     try {
       final result = await _repo.list(page: page, status: status);
       if (gen != _generation) return;
-      emit(OrdersState(
-        orders: [...state.orders, ...result.items],
-        status: status,
-        page: result.page,
-        hasMore: result.hasMore,
-      ));
+      emit(
+        OrdersState(
+          orders: [...state.orders, ...result.items],
+          status: status,
+          page: result.page,
+          hasMore: result.hasMore,
+        ),
+      );
     } on AppFailure catch (f) {
       if (gen != _generation) return;
-      emit(OrdersState(
-        orders: state.orders,
-        status: status,
-        page: state.page,
-        hasMore: state.hasMore,
-        failure: f,
-      ));
+      emit(
+        OrdersState(
+          orders: state.orders,
+          status: status,
+          page: state.page,
+          hasMore: state.hasMore,
+          failure: f,
+        ),
+      );
     }
   }
 }

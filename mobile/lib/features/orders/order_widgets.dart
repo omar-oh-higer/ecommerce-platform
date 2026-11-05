@@ -6,12 +6,12 @@ String formatDate(DateTime? d) =>
     d == null ? '' : DateFormat('d MMM yyyy, HH:mm').format(d.toLocal());
 
 Color statusColor(OrderStatus s) => switch (s) {
-      OrderStatus.pending => Colors.orange.shade800,
-      OrderStatus.confirmed => Colors.blue.shade700,
-      OrderStatus.shipped => Colors.indigo.shade600,
-      OrderStatus.delivered => Colors.green.shade700,
-      OrderStatus.cancelled => Colors.red.shade700,
-    };
+  OrderStatus.pending => Colors.orange.shade800,
+  OrderStatus.confirmed => Colors.blue.shade700,
+  OrderStatus.shipped => Colors.indigo.shade600,
+  OrderStatus.delivered => Colors.green.shade700,
+  OrderStatus.cancelled => Colors.red.shade700,
+};
 
 class StatusChip extends StatelessWidget {
   const StatusChip(this.status, {super.key});
@@ -26,8 +26,10 @@ class StatusChip extends StatelessWidget {
         color: c.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(status.label,
-          style: TextStyle(color: c, fontWeight: FontWeight.w600, fontSize: 12)),
+      child: Text(
+        status.label,
+        style: TextStyle(color: c, fontWeight: FontWeight.w600, fontSize: 12),
+      ),
     );
   }
 }
@@ -47,30 +49,44 @@ class StatusTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (status == OrderStatus.cancelled) {
-      return Row(children: [
-        Icon(Icons.cancel, color: statusColor(status)),
-        const SizedBox(width: 8),
-        Text('This order was cancelled. Reserved items were returned to stock.',
-            style: TextStyle(color: statusColor(status))),
-      ].map((w) => w is Text ? Expanded(child: w) : w).toList());
+      return Row(
+        children: [
+          Icon(Icons.cancel, color: statusColor(status)),
+          const SizedBox(width: 8),
+          Text(
+            'This order was cancelled. Reserved items were returned to stock.',
+            style: TextStyle(color: statusColor(status)),
+          ),
+        ].map((w) => w is Text ? Expanded(child: w) : w).toList(),
+      );
     }
     final current = _steps.indexOf(status);
-    return Column(children: [
-      for (var i = 0; i < _steps.length; i++)
-        Row(children: [
-          Icon(
-            i <= current ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: i <= current ? statusColor(_steps[i]) : Colors.grey,
-            size: 22,
-          ),
-          const SizedBox(width: 12),
-          Text(_steps[i].label,
-              style: TextStyle(
-                fontWeight: i == current ? FontWeight.bold : FontWeight.normal,
-                color: i <= current ? null : Colors.grey,
-              )),
-        ]).withPadding(const EdgeInsets.symmetric(vertical: 6)),
-    ]);
+    return Column(
+      children: [
+        for (var i = 0; i < _steps.length; i++)
+          Row(
+            children: [
+              Icon(
+                i <= current
+                    ? Icons.check_circle
+                    : Icons.radio_button_unchecked,
+                color: i <= current ? statusColor(_steps[i]) : Colors.grey,
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                _steps[i].label,
+                style: TextStyle(
+                  fontWeight: i == current
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: i <= current ? null : Colors.grey,
+                ),
+              ),
+            ],
+          ).withPadding(const EdgeInsets.symmetric(vertical: 6)),
+      ],
+    );
   }
 }
 

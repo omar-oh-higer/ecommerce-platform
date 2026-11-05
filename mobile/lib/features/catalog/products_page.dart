@@ -23,7 +23,8 @@ class _ProductsPageState extends State<ProductsPage> {
   void initState() {
     super.initState();
     _scroll.addListener(() {
-      if (_scroll.position.extentAfter < 300) context.read<ProductsCubit>().loadMore();
+      if (_scroll.position.extentAfter < 300)
+        context.read<ProductsCubit>().loadMore();
     });
   }
 
@@ -36,16 +37,21 @@ class _ProductsPageState extends State<ProductsPage> {
 
   void _onSearch(String text) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400),
-        () => context.read<ProductsCubit>().setSearch(text));
+    _debounce = Timer(
+      const Duration(milliseconds: 400),
+      () => context.read<ProductsCubit>().setSearch(text),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<ProductsCubit>();
     final user = context.select<AuthCubit, User?>(
-        (c) => c.state is Authenticated ? (c.state as Authenticated).user : null);
-    final cartCount = context.select<CartCubit, int>((c) => c.state.totalQuantity);
+      (c) => c.state is Authenticated ? (c.state as Authenticated).user : null,
+    );
+    final cartCount = context.select<CartCubit, int>(
+      (c) => c.state.totalQuantity,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -90,77 +96,102 @@ class _ProductsPageState extends State<ProductsPage> {
           ),
         ],
       ),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: SearchBar(
-            hintText: 'Search products',
-            leading: const Icon(Icons.search),
-            onChanged: _onSearch,
-            elevation: const WidgetStatePropertyAll(0),
-          ),
-        ),
-        BlocBuilder<ProductsCubit, ProductsState>(
-          buildWhen: (a, b) => a.categories != b.categories || a.categoryId != b.categoryId,
-          builder: (context, s) => SizedBox(
-            height: 52,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: [
-                _chip('All', s.categoryId == null, () => cubit.selectCategory(null)),
-                for (final c in s.categories)
-                  _chip(c.name, s.categoryId == c.id, () => cubit.selectCategory(c.id)),
-              ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: SearchBar(
+              hintText: 'Search products',
+              leading: const Icon(Icons.search),
+              onChanged: _onSearch,
+              elevation: const WidgetStatePropertyAll(0),
             ),
           ),
-        ),
-        Expanded(
-          child: BlocBuilder<ProductsCubit, ProductsState>(
-            builder: (context, s) {
-              if (s.initialLoading) return const Center(child: CircularProgressIndicator());
-              if (s.failure != null && s.products.isEmpty) {
-                return ErrorView(s.failure!, onRetry: cubit.refresh);
-              }
-              if (s.products.isEmpty) {
-                return const Center(child: Text('No products found.'));
-              }
-              return RefreshIndicator(
-                onRefresh: cubit.refresh,
-                child: GridView.builder(
-                  controller: _scroll,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(12),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 220,
-                    childAspectRatio: 0.68,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: s.products.length + (s.hasMore || s.failure != null ? 1 : 0),
-                  itemBuilder: (context, i) {
-                    if (i == s.products.length) {
-                      return s.failure != null
-                          ? Center(
-                              child: TextButton(
-                                  onPressed: cubit.loadMore, child: const Text('Retry')))
-                          : const Center(child: CircularProgressIndicator());
-                    }
-                    return _ProductCard(s.products[i]);
-                  },
+          BlocBuilder<ProductsCubit, ProductsState>(
+            buildWhen: (a, b) =>
+                a.categories != b.categories || a.categoryId != b.categoryId,
+            builder: (context, s) => SizedBox(
+              height: 52,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-              );
-            },
+                children: [
+                  _chip(
+                    'All',
+                    s.categoryId == null,
+                    () => cubit.selectCategory(null),
+                  ),
+                  for (final c in s.categories)
+                    _chip(
+                      c.name,
+                      s.categoryId == c.id,
+                      () => cubit.selectCategory(c.id),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ]),
+          Expanded(
+            child: BlocBuilder<ProductsCubit, ProductsState>(
+              builder: (context, s) {
+                if (s.initialLoading)
+                  return const Center(child: CircularProgressIndicator());
+                if (s.failure != null && s.products.isEmpty) {
+                  return ErrorView(s.failure!, onRetry: cubit.refresh);
+                }
+                if (s.products.isEmpty) {
+                  return const Center(child: Text('No products found.'));
+                }
+                return RefreshIndicator(
+                  onRefresh: cubit.refresh,
+                  child: GridView.builder(
+                    controller: _scroll,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(12),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 220,
+                          childAspectRatio: 0.68,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
+                    itemCount:
+                        s.products.length +
+                        (s.hasMore || s.failure != null ? 1 : 0),
+                    itemBuilder: (context, i) {
+                      if (i == s.products.length) {
+                        return s.failure != null
+                            ? Center(
+                                child: TextButton(
+                                  onPressed: cubit.loadMore,
+                                  child: const Text('Retry'),
+                                ),
+                              )
+                            : const Center(child: CircularProgressIndicator());
+                      }
+                      return _ProductCard(s.products[i]);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _chip(String label, bool selected, VoidCallback onTap) => Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: ChoiceChip(label: Text(label), selected: selected, onSelected: (_) => onTap()),
-      );
+    padding: const EdgeInsets.only(right: 8),
+    child: ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+    ),
+  );
 }
 
 class _ProductCard extends StatelessWidget {
@@ -169,23 +200,37 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => context.push('/products/${product.id}'),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Expanded(child: SizedBox.expand(child: ProductImage(product.imageUrl))),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(product.name, maxLines: 2, overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: () => context.push('/products/${product.id}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SizedBox.expand(child: ProductImage(product.imageUrl)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 4),
-                Text(product.price.toString(),
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  product.price.toString(),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 StockBadge(product.stock),
-              ]),
+              ],
             ),
-          ]),
-        ),
-      );
+          ),
+        ],
+      ),
+    ),
+  );
 }

@@ -130,7 +130,8 @@ GoRouter _buildRouter(AuthCubit auth) {
       final loc = state.matchedLocation;
       final inAuthArea = loc == '/login' || loc == '/register';
       if (s is AuthUnknown) return loc == '/splash' ? null : '/splash';
-      if (s is Authenticated) return (inAuthArea || loc == '/splash') ? '/' : null;
+      if (s is Authenticated)
+        return (inAuthArea || loc == '/splash') ? '/' : null;
       return inAuthArea ? null : '/login';
     },
     routes: [
@@ -140,21 +141,27 @@ GoRouter _buildRouter(AuthCubit auth) {
       GoRoute(path: '/', builder: (_, _) => const ProductsPage()),
       GoRoute(
         path: '/products/:id',
-        builder: (_, state) =>
-            ProductDetailPage(productId: int.parse(state.pathParameters['id']!)),
+        builder: (_, state) => ProductDetailPage(
+          productId: int.parse(state.pathParameters['id']!),
+        ),
       ),
       GoRoute(path: '/cart', builder: (_, _) => const CartPage()),
       GoRoute(
         path: '/notifications',
         builder: (context, _) => BlocProvider(
-          create: (_) => NotificationsCubit(context.read<NotificationsRepository>())..load(),
+          create: (_) =>
+              NotificationsCubit(context.read<NotificationsRepository>())
+                ..load(),
           child: const NotificationsPage(),
         ),
       ),
       GoRoute(
         path: '/checkout',
         builder: (context, _) => BlocProvider(
-          create: (_) => CheckoutCubit(context.read<OrdersRepository>(), context.read<CartCubit>()),
+          create: (_) => CheckoutCubit(
+            context.read<OrdersRepository>(),
+            context.read<CartCubit>(),
+          ),
           child: const CheckoutPage(),
         ),
       ),
@@ -167,7 +174,8 @@ GoRouter _buildRouter(AuthCubit auth) {
       ),
       GoRoute(
         path: '/orders/:id',
-        builder: (_, state) => OrderDetailPage(orderId: int.parse(state.pathParameters['id']!)),
+        builder: (_, state) =>
+            OrderDetailPage(orderId: int.parse(state.pathParameters['id']!)),
       ),
     ],
   );

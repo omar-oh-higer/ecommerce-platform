@@ -34,22 +34,32 @@ class ProductsState extends Equatable {
     bool? hasMore,
     bool? loading,
     Object? failure = _keep,
-  }) =>
-      ProductsState(
-        products: products ?? this.products,
-        categories: categories ?? this.categories,
-        categoryId: identical(categoryId, _keep) ? this.categoryId : categoryId as int?,
-        search: search ?? this.search,
-        page: page ?? this.page,
-        hasMore: hasMore ?? this.hasMore,
-        loading: loading ?? this.loading,
-        failure: identical(failure, _keep) ? this.failure : failure as AppFailure?,
-      );
+  }) => ProductsState(
+    products: products ?? this.products,
+    categories: categories ?? this.categories,
+    categoryId: identical(categoryId, _keep)
+        ? this.categoryId
+        : categoryId as int?,
+    search: search ?? this.search,
+    page: page ?? this.page,
+    hasMore: hasMore ?? this.hasMore,
+    loading: loading ?? this.loading,
+    failure: identical(failure, _keep) ? this.failure : failure as AppFailure?,
+  );
 
   static const _keep = Object();
 
   @override
-  List<Object?> get props => [products, categories, categoryId, search, page, hasMore, loading, failure];
+  List<Object?> get props => [
+    products,
+    categories,
+    categoryId,
+    search,
+    page,
+    hasMore,
+    loading,
+    failure,
+  ];
 }
 
 class ProductsCubit extends Cubit<ProductsState> {
@@ -92,22 +102,29 @@ class ProductsCubit extends Cubit<ProductsState> {
   Future<void> _fetch({required bool reset}) async {
     final gen = ++_generation;
     final page = reset ? 1 : state.page + 1;
-    emit(state.copyWith(
-      loading: true,
-      failure: null,
-      products: reset ? const [] : null,
-      hasMore: reset ? true : null,
-    ));
+    emit(
+      state.copyWith(
+        loading: true,
+        failure: null,
+        products: reset ? const [] : null,
+        hasMore: reset ? true : null,
+      ),
+    );
     try {
       final result = await _repo.products(
-          page: page, categoryId: state.categoryId, search: state.search);
+        page: page,
+        categoryId: state.categoryId,
+        search: state.search,
+      );
       if (gen != _generation) return;
-      emit(state.copyWith(
-        products: [...state.products, ...result.items],
-        page: result.page,
-        hasMore: result.hasMore,
-        loading: false,
-      ));
+      emit(
+        state.copyWith(
+          products: [...state.products, ...result.items],
+          page: result.page,
+          hasMore: result.hasMore,
+          loading: false,
+        ),
+      );
     } on AppFailure catch (f) {
       if (gen != _generation) return;
       emit(state.copyWith(loading: false, failure: f));

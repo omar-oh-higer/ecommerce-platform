@@ -18,7 +18,8 @@ void main() {
       : ApiConfig(
           baseUrl: Platform.isAndroid
               ? 'http://10.0.2.2:8000'
-              : 'http://localhost:8000');
+              : 'http://localhost:8000',
+        );
 
   if (kReleaseMode && !config.isSecureOrLocal) {
     throw StateError('Release builds must use an https:// API_BASE_URL.');
@@ -35,15 +36,17 @@ void main() {
 
   final catalog = CatalogRepository(api);
   final notifications = NotificationsRepository(api);
-  runApp(ShopApp(
-    auth: auth,
-    config: config,
-    api: api,
-    catalog: catalog,
-    orders: OrdersRepository(api),
-    notifications: notifications,
-    unread: UnreadCountCubit(PollingNotificationSource(notifications)),
-    cart: CartCubit(PrefsCartStorage()),
-    products: ProductsCubit(catalog)..load(),
-  ));
+  runApp(
+    ShopApp(
+      auth: auth,
+      config: config,
+      api: api,
+      catalog: catalog,
+      orders: OrdersRepository(api),
+      notifications: notifications,
+      unread: UnreadCountCubit(PollingNotificationSource(notifications)),
+      cart: CartCubit(PrefsCartStorage()),
+      products: ProductsCubit(catalog)..load(),
+    ),
+  );
 }

@@ -31,34 +31,41 @@ class CartItem extends Equatable {
   Money get lineTotal => unitPrice * quantity;
 
   CartItem copyWith({int? quantity, int? maxQuantity}) => CartItem(
-        productId: productId,
-        name: name,
-        unitPrice: unitPrice,
-        quantity: quantity ?? this.quantity,
-        imageUrl: imageUrl,
-        maxQuantity: maxQuantity ?? this.maxQuantity,
-      );
+    productId: productId,
+    name: name,
+    unitPrice: unitPrice,
+    quantity: quantity ?? this.quantity,
+    imageUrl: imageUrl,
+    maxQuantity: maxQuantity ?? this.maxQuantity,
+  );
 
   Map<String, dynamic> toJson() => {
-        'product_id': productId,
-        'name': name,
-        'unit_price_cents': unitPrice.cents,
-        'quantity': quantity,
-        'image_url': imageUrl,
-        'max_quantity': maxQuantity,
-      };
+    'product_id': productId,
+    'name': name,
+    'unit_price_cents': unitPrice.cents,
+    'quantity': quantity,
+    'image_url': imageUrl,
+    'max_quantity': maxQuantity,
+  };
 
   factory CartItem.fromJson(Map<String, dynamic> j) => CartItem(
-        productId: (j['product_id'] as num).toInt(),
-        name: j['name'] as String,
-        unitPrice: Money((j['unit_price_cents'] as num).toInt()),
-        quantity: (j['quantity'] as num).toInt(),
-        imageUrl: j['image_url'] as String?,
-        maxQuantity: (j['max_quantity'] as num?)?.toInt() ?? kMaxLineQuantity,
-      );
+    productId: (j['product_id'] as num).toInt(),
+    name: j['name'] as String,
+    unitPrice: Money((j['unit_price_cents'] as num).toInt()),
+    quantity: (j['quantity'] as num).toInt(),
+    imageUrl: j['image_url'] as String?,
+    maxQuantity: (j['max_quantity'] as num?)?.toInt() ?? kMaxLineQuantity,
+  );
 
   @override
-  List<Object?> get props => [productId, name, unitPrice, quantity, imageUrl, maxQuantity];
+  List<Object?> get props => [
+    productId,
+    name,
+    unitPrice,
+    quantity,
+    imageUrl,
+    maxQuantity,
+  ];
 }
 
 class CartState extends Equatable {
@@ -113,9 +120,12 @@ class CartCubit extends Cubit<CartState> {
     try {
       final raw = await _storage.read(key);
       if (raw == null || key != _userKey) return;
-      emit(CartState([
-        for (final j in (jsonDecode(raw) as List)) CartItem.fromJson((j as Map).cast<String, dynamic>())
-      ]));
+      emit(
+        CartState([
+          for (final j in (jsonDecode(raw) as List))
+            CartItem.fromJson((j as Map).cast<String, dynamic>()),
+        ]),
+      );
     } catch (_) {
       // Corrupt data: start with an empty cart.
     }
@@ -132,14 +142,16 @@ class CartCubit extends Cubit<CartState> {
       items[i] = items[i].copyWith(quantity: q, maxQuantity: max);
     } else {
       if (items.length >= kMaxCartLines) return false;
-      items.add(CartItem(
-        productId: product.id,
-        name: product.name,
-        unitPrice: product.price,
-        imageUrl: product.imageUrl,
-        quantity: quantity.clamp(1, max),
-        maxQuantity: max,
-      ));
+      items.add(
+        CartItem(
+          productId: product.id,
+          name: product.name,
+          unitPrice: product.price,
+          imageUrl: product.imageUrl,
+          quantity: quantity.clamp(1, max),
+          maxQuantity: max,
+        ),
+      );
     }
     _set(items);
     return true;
@@ -170,19 +182,24 @@ class CartCubit extends Cubit<CartState> {
       if (available == null) {
         items.add(e);
       } else if (available > 0) {
-        items.add(e.copyWith(
+        items.add(
+          e.copyWith(
             quantity: e.quantity > available ? available : e.quantity,
-            maxQuantity: available));
+            maxQuantity: available,
+          ),
+        );
       }
     }
     _set(items);
   }
 
-  int _limit(int? stock) => stock == null ? kMaxLineQuantity : stock.clamp(1, kMaxLineQuantity);
+  int _limit(int? stock) =>
+      stock == null ? kMaxLineQuantity : stock.clamp(1, kMaxLineQuantity);
 
   void _set(List<CartItem> items) {
     emit(CartState(items));
     final key = _userKey;
-    if (key != null) _storage.write(key, jsonEncode([for (final i in items) i.toJson()]));
+    if (key != null)
+      _storage.write(key, jsonEncode([for (final i in items) i.toJson()]));
   }
 }
