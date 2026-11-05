@@ -55,7 +55,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 children: [StatusChip(o.status), Text(formatDate(o.createdAt))],
               ),
               const SizedBox(height: 16),
-              StatusTimeline(o.status),
+              StatusTimeline(o.status, stockReturnPending: o.stockReturnPending),
               const Divider(height: 32),
               for (final i in o.items)
                 ListTile(

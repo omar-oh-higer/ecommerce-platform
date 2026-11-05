@@ -22,6 +22,7 @@ class Order extends Model
         return [
             'status' => OrderStatus::class,
             'total' => 'decimal:2',
+            'stock_released_at' => 'datetime',
         ];
     }
 

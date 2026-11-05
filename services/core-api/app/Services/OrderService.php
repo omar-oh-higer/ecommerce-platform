@@ -90,7 +90,10 @@ class OrderService
 
     /**
      * Admin changes the status. Only the transitions in OrderStatus::next() are allowed.
-     * Cancelling gives the stock back.
+     *
+     * Cancelling always succeeds, even when the inventory service is down: the order is cancelled
+     * at once and its stock is given back now, or — if the service cannot be reached — by a queued
+     * job as soon as it is back. `stock_released_at` stays NULL until the stock is really back.
      */
     public function changeStatus(Order $order, OrderStatus $status): Order
     {
@@ -113,11 +116,12 @@ class OrderService
             OrderStatusChanged::dispatch($order, $from);
 
             if ($status === OrderStatus::Cancelled) {
+                // After the commit: the cancellation is saved whatever happens to the inventory call.
                 DB::afterCommit(fn () => $this->releaseOrRetry($order->reservation_id));
             }
 
             return $order;
-        });
+        })->refresh();   // picks up stock_released_at written after the commit
     }
 
     /**
@@ -128,9 +132,18 @@ class OrderService
     {
         try {
             $this->inventory->release($reservationId);
+            self::markStockReleased($reservationId);
         } catch (Throwable $e) {
             Log::warning('Stock release failed, queued for retry', ['reservation_id' => $reservationId, 'error' => $e->getMessage()]);
             ReleaseReservation::dispatch($reservationId);
         }
+    }
+
+    /** Records that the order's stock is back in the inventory service (no-op if there is no order). */
+    public static function markStockReleased(string $reservationId): void
+    {
+        Order::where('reservation_id', $reservationId)
+            ->whereNull('stock_released_at')
+            ->update(['stock_released_at' => now()]);
     }
 }

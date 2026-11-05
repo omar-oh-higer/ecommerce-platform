@@ -71,4 +71,15 @@ void orderTests() {
     expect(detail.nextStatuses, [OrderStatus.shipped, OrderStatus.cancelled]);
     expect(detail.customer?.email, 'c@x.y');
   });
+
+  test('Cancelled order tells whether its stock is still waiting to be returned', () {
+    Order cancelled(String? stockReturn) => Order.fromJson({
+          'id': 13, 'status': 'cancelled', 'total': '36.00', 'items_count': 1,
+          'stock_return': ?stockReturn,
+        });
+
+    expect(cancelled('pending').stockReturnPending, isTrue);  // inventory was down
+    expect(cancelled('done').stockReturnPending, isFalse);
+    expect(cancelled(null).stockReturnPending, isFalse);      // field absent
+  });
 }

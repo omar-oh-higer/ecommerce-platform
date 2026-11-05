@@ -293,4 +293,76 @@ class OrderTest extends TestCase
             ->assertStatus(409);
         $this->assertSame(5, $this->inventory->getStock($product->id));
     }
+
+    // ---- Cancel while the inventory service is down ------------------------------
+
+    public function test_cancelled_order_reports_stock_returned_when_inventory_is_up(): void
+    {
+        $product = $this->productWithStock(5);
+        $orderId = $this->placeOrder(User::factory()->create(), [['product_id' => $product->id, 'quantity' => 2]])->json('data.id');
+
+        $this->withToken($this->tokenFor(User::factory()->admin()->create()))
+            ->patchJson("/api/v1/orders/{$orderId}/status", ['status' => 'cancelled'])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'cancelled')
+            ->assertJsonPath('data.stock_return', 'done');
+
+        $this->assertNotNull(Order::find($orderId)->stock_released_at);
+    }
+
+    public function test_order_is_cancelled_even_when_inventory_is_down_and_stock_comes_back_later(): void
+    {
+        Queue::fake();
+        $product = $this->productWithStock(5);
+        $orderId = $this->placeOrder(User::factory()->create(), [['product_id' => $product->id, 'quantity' => 2]])->json('data.id');
+        $this->assertSame(3, $this->inventory->getStock($product->id));
+
+        // The inventory service goes down, then the admin cancels.
+        $this->app->instance(InventoryClient::class, new FakeInventoryClient(app('cache')->store(), down: true));
+
+        $this->withToken($this->tokenFor(User::factory()->admin()->create()))
+            ->patchJson("/api/v1/orders/{$orderId}/status", ['status' => 'cancelled'])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'cancelled')       // cancelled at once
+            ->assertJsonPath('data.stock_return', 'pending');  // stock not back yet
+
+        $this->assertSame(OrderStatus::Cancelled, Order::find($orderId)->status);
+        $this->assertNull(Order::find($orderId)->stock_released_at);
+
+        $job = null;
+        Queue::assertPushed(ReleaseReservation::class, function (ReleaseReservation $pushed) use (&$job) {
+            $job = $pushed;
+
+            return true;
+        });
+
+        // The inventory service is back: the queued job returns the stock and records it.
+        $this->app->instance(InventoryClient::class, $this->inventory);
+        $job->handle($this->inventory);
+
+        $this->assertSame(5, $this->inventory->getStock($product->id));
+        $this->assertNotNull(Order::find($orderId)->stock_released_at);
+
+        $this->withToken($this->tokenFor(User::factory()->admin()->create()))
+            ->getJson("/api/v1/orders/{$orderId}")
+            ->assertJsonPath('data.stock_return', 'done');
+    }
+
+    public function test_release_job_keeps_retrying_for_a_whole_day(): void
+    {
+        $job = new ReleaseReservation('any-id');
+
+        $this->assertGreaterThan(now()->addHours(23), $job->retryUntil());
+        $this->assertLessThanOrEqual(60, max($job->backoff));
+    }
+
+    public function test_stock_return_is_only_shown_for_cancelled_orders(): void
+    {
+        $order = Order::factory()->create();
+
+        $this->withToken($this->tokenFor(User::factory()->admin()->create()))
+            ->getJson("/api/v1/orders/{$order->id}")
+            ->assertOk()
+            ->assertJsonMissingPath('data.stock_return');
+    }
 }

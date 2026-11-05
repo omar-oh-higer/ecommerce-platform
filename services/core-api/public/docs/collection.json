@@ -10,7 +10,7 @@
     ],
     "info": {
         "name": "E-Commerce Platform API \u2014 v1",
-        "_postman_id": "cab514cd-f28a-44d8-8a48-d3f35574a8cc",
+        "_postman_id": "e864fb12-9566-4cdc-9e74-bf19abd6ccd8",
         "description": "REST API of the core application (Laravel). Damascus University \u2014 Internet Applications project 2026.",
         "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
     },
@@ -343,7 +343,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": 16,
+                                    "value": 1,
                                     "description": "The ID of the product."
                                 },
                                 {
@@ -492,7 +492,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"status\":\"confirmed\",\"per_page\":1,\"page\":22}"
+                            "raw": "{\"status\":\"shipped\",\"per_page\":1,\"page\":22}"
                         },
                         "description": "A customer gets **only their own** orders. An admin gets every order, plus `customer` and `next_statuses`."
                     },
@@ -517,7 +517,7 @@
                                 {
                                     "id": "id",
                                     "key": "id",
-                                    "value": 16,
+                                    "value": 1,
                                     "description": "The ID of the order."
                                 },
                                 {
@@ -610,7 +610,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"unread\":true,\"per_page\":1,\"page\":22}"
+                            "raw": "{\"unread\":false,\"per_page\":1,\"page\":22}"
                         },
                         "description": "Newest first. `meta.unread_count` holds the number of unread notifications.\nTypes: `order.placed` (customer), `order.new` (admins), `order.status_changed` (order owner)."
                     },
@@ -887,7 +887,7 @@
                                 {
                                     "id": "product_id",
                                     "key": "product_id",
-                                    "value": 16,
+                                    "value": 1,
                                     "description": "The ID of the product."
                                 },
                                 {
@@ -942,7 +942,7 @@
                                 {
                                     "id": "order_id",
                                     "key": "order_id",
-                                    "value": 16,
+                                    "value": 1,
                                     "description": "The ID of the order."
                                 },
                                 {
@@ -968,14 +968,20 @@
                             "mode": "raw",
                             "raw": "{\"status\":\"confirmed\"}"
                         },
-                        "description": "**Admin only** (a customer gets 403, even on their own order).\nAllowed: pending \u2192 confirmed | cancelled, confirmed \u2192 shipped | cancelled, shipped \u2192 delivered.\nCancelling gives the stock back to the inventory service. The customer is notified."
+                        "description": "**Admin only** (a customer gets 403, even on their own order).\nAllowed: pending \u2192 confirmed | cancelled, confirmed \u2192 shipped | cancelled, shipped \u2192 delivered.\nCancelling gives the stock back to the inventory service. The customer is notified.\nCancelling **always succeeds**, even when the inventory service is down: the response then has\n`stock_return: \"pending\"` and a background job returns the stock as soon as the service is back\n(`stock_return` becomes `\"done\"`)."
                     },
                     "response": [
                         {
                             "header": [],
                             "code": 200,
                             "body": "{\"data\": {\"id\": 1, \"status\": \"confirmed\", \"total\": \"53.50\", \"items\": [{\"product_id\": 6, \"name\": \"Cotton T-Shirt\", \"unit_price\": \"12.00\", \"quantity\": 2, \"line_total\": \"24.00\"}], \"customer\": {\"id\": 2, \"name\": \"Test Customer\", \"email\": \"customer@store.test\"}, \"next_statuses\": [\"shipped\", \"cancelled\"], \"created_at\": \"2026-11-04T20:24:14+00:00\", \"updated_at\": \"2026-11-04T20:30:00+00:00\"}}",
-                            "name": ""
+                            "name": "Confirmed"
+                        },
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\": {\"id\": 13, \"status\": \"cancelled\", \"total\": \"36.00\", \"items\": [{\"product_id\": 6, \"name\": \"Cotton T-Shirt\", \"unit_price\": \"12.00\", \"quantity\": 3, \"line_total\": \"36.00\"}], \"customer\": {\"id\": 11, \"name\": \"Test Customer\", \"email\": \"customer@store.test\"}, \"stock_return\": \"pending\", \"next_statuses\": [], \"created_at\": \"2026-11-05T10:27:12+00:00\", \"updated_at\": \"2026-11-05T10:27:15+00:00\"}}",
+                            "name": "Cancelled while the inventory service is down"
                         },
                         {
                             "header": [],

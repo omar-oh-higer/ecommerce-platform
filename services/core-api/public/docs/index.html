@@ -165,7 +165,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: November 4, 2026</li>
+        <li>Last updated: November 5, 2026</li>
     </ul>
 </div>
 
@@ -1367,7 +1367,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/products/16" \
+    --get "http://localhost:8000/api/v1/products/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
@@ -1517,10 +1517,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-v1-products--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the product. Example: <code>16</code></p>
+<p>The ID of the product. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>product</code></b>&nbsp;&nbsp;
@@ -1799,7 +1799,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"status\": \"confirmed\",
+    \"status\": \"shipped\",
     \"per_page\": 1,
     \"page\": 22
 }"
@@ -1970,10 +1970,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="status"                data-endpoint="GETapi-v1-orders"
-               value="confirmed"
+               value="shipped"
                data-component="body">
     <br>
-<p>Example: <code>confirmed</code></p>
+<p>Example: <code>shipped</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>pending</code></li> <li><code>confirmed</code></li> <li><code>shipped</code></li> <li><code>delivered</code></li> <li><code>cancelled</code></li></ul>
         </div>
@@ -2017,7 +2017,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost:8000/api/v1/orders/16" \
+    --get "http://localhost:8000/api/v1/orders/1" \
     --header "Authorization: Bearer {YOUR_JWT_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2174,10 +2174,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="id"                data-endpoint="GETapi-v1-orders--id-"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the order. Example: <code>16</code></p>
+<p>The ID of the order. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>order</code></b>&nbsp;&nbsp;
@@ -2217,7 +2217,7 @@ Types: <code>order.placed</code> (customer), <code>order.new</code> (admins), <c
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
-    \"unread\": true,
+    \"unread\": false,
     \"per_page\": 1,
     \"page\": 22
 }"
@@ -2432,7 +2432,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
             <code>false</code>
         </label>
     <br>
-<p>Example: <code>true</code></p>
+<p>Example: <code>false</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
@@ -3050,7 +3050,7 @@ if that fails nothing is saved (no product row, no image) and 503 is returned.</
     --form "description=RGB mouse"\
     --form "price=25.5"\
     --form "quantity=5"\
-    --form "image=@C:\Users\David\AppData\Local\Temp\php58F8.tmp" </code></pre></div>
+    --form "image=@/tmp/phpnoaasjl84dfobi8jXFE" </code></pre></div>
 
 </span>
 
@@ -3266,7 +3266,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>jpg, jpeg, png or webp, max 2 MB. SVG is refused. Example: <code>C:\Users\David\AppData\Local\Temp\php58F8.tmp</code></p>
+<p>jpg, jpeg, png or webp, max 2 MB. SVG is refused. Example: <code>/tmp/phpnoaasjl84dfobi8jXFE</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>quantity</code></b>&nbsp;&nbsp;
@@ -3296,7 +3296,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/products/16/stock" \
+    "http://localhost:8000/api/v1/products/1/stock" \
     --header "Authorization: Bearer {YOUR_JWT_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -3438,10 +3438,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="product_id"                data-endpoint="PATCHapi-v1-products--product_id--stock"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the product. Example: <code>16</code></p>
+<p>The ID of the product. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>product</code></b>&nbsp;&nbsp;
@@ -3478,7 +3478,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <p><strong>Admin only</strong> (a customer gets 403, even on their own order).
 Allowed: pending → confirmed | cancelled, confirmed → shipped | cancelled, shipped → delivered.
-Cancelling gives the stock back to the inventory service. The customer is notified.</p>
+Cancelling gives the stock back to the inventory service. The customer is notified.
+Cancelling <strong>always succeeds</strong>, even when the inventory service is down: the response then has
+<code>stock_return: "pending"</code> and a background job returns the stock as soon as the service is back
+(<code>stock_return</code> becomes <code>"done"</code>).</p>
 
 <span id="example-requests-PATCHapi-v1-orders--order_id--status">
 <blockquote>Example request:</blockquote>
@@ -3486,7 +3489,7 @@ Cancelling gives the stock back to the inventory service. The customer is notifi
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://localhost:8000/api/v1/orders/16/status" \
+    "http://localhost:8000/api/v1/orders/1/status" \
     --header "Authorization: Bearer {YOUR_JWT_TOKEN}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -3499,7 +3502,7 @@ Cancelling gives the stock back to the inventory service. The customer is notifi
 
 <span id="example-responses-PATCHapi-v1-orders--order_id--status">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (200, Confirmed):</p>
         </blockquote>
                 <pre>
 
@@ -3528,6 +3531,37 @@ Cancelling gives the stock back to the inventory service. The customer is notifi
         ],
         &quot;created_at&quot;: &quot;2026-11-04T20:24:14+00:00&quot;,
         &quot;updated_at&quot;: &quot;2026-11-04T20:30:00+00:00&quot;
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (200, Cancelled while the inventory service is down):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: 13,
+        &quot;status&quot;: &quot;cancelled&quot;,
+        &quot;total&quot;: &quot;36.00&quot;,
+        &quot;items&quot;: [
+            {
+                &quot;product_id&quot;: 6,
+                &quot;name&quot;: &quot;Cotton T-Shirt&quot;,
+                &quot;unit_price&quot;: &quot;12.00&quot;,
+                &quot;quantity&quot;: 3,
+                &quot;line_total&quot;: &quot;36.00&quot;
+            }
+        ],
+        &quot;customer&quot;: {
+            &quot;id&quot;: 11,
+            &quot;name&quot;: &quot;Test Customer&quot;,
+            &quot;email&quot;: &quot;customer@store.test&quot;
+        },
+        &quot;stock_return&quot;: &quot;pending&quot;,
+        &quot;next_statuses&quot;: [],
+        &quot;created_at&quot;: &quot;2026-11-05T10:27:12+00:00&quot;,
+        &quot;updated_at&quot;: &quot;2026-11-05T10:27:15+00:00&quot;
     }
 }</code>
  </pre>
@@ -3652,10 +3686,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="order_id"                data-endpoint="PATCHapi-v1-orders--order_id--status"
-               value="16"
+               value="1"
                data-component="url">
     <br>
-<p>The ID of the order. Example: <code>16</code></p>
+<p>The ID of the order. Example: <code>1</code></p>
             </div>
                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>order</code></b>&nbsp;&nbsp;

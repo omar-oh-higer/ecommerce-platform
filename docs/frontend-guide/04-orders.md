@@ -185,6 +185,21 @@ curl --location --request PATCH '{{base_url}}/orders/1/status' \
 ```
 - عند `cancelled` تُرجع كمية الطلب للمخزون تلقائياً (مرة واحدة فقط).
 
+### الإلغاء وخدمة المستودع متوقفة
+**الإلغاء ينجح دائماً**، حتى لو كانت خدمة المستودع متوقفة. الطلب الملغى فيه حقل إضافي `stock_return`:
+
+| `stock_return` | المعنى | ماذا يعرض التطبيق |
+|---|---|---|
+| `done` | الكمية رجعت للمخزون | "Reserved items were returned to stock." |
+| `pending` | المستودع كان متوقفاً لحظة الإلغاء؛ الكمية تُرجع **تلقائياً** خلال دقيقة تقريباً من عودته | الداشبورد: "Stock return pending…" — الموبايل: "…will be returned to stock shortly." |
+
+```json
+{ "data": { "id": 13, "status": "cancelled", "stock_return": "pending", "next_statuses": [], "...": "..." } }
+```
+الحقل يظهر في الطلبات الملغاة فقط. أعد طلب `GET /orders/{id}` لاحقاً لترى `done`.
+
+**جرّبه:** اطلب منتجاً ← `docker compose stop inventory-service` ← ألغِ الطلب من الداشبورد (200، `pending`) ← `docker compose start inventory-service` ← خلال دقيقة تقريباً تعود الكمية و `stock_return` يصبح `done`.
+
 ---
 
 ## سيناريوهات اختبار في Postman

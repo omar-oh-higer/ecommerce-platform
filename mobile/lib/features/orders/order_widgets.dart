@@ -36,8 +36,11 @@ class StatusChip extends StatelessWidget {
 
 /// pending -> confirmed -> shipped -> delivered, or a cancelled banner.
 class StatusTimeline extends StatelessWidget {
-  const StatusTimeline(this.status, {super.key});
+  const StatusTimeline(this.status, {super.key, this.stockReturnPending = false});
   final OrderStatus status;
+
+  /// Cancelled while the stock service was down: items are not back in stock yet.
+  final bool stockReturnPending;
 
   static const _steps = [
     OrderStatus.pending,
@@ -54,7 +57,9 @@ class StatusTimeline extends StatelessWidget {
           Icon(Icons.cancel, color: statusColor(status)),
           const SizedBox(width: 8),
           Text(
-            'This order was cancelled. Reserved items were returned to stock.',
+            stockReturnPending
+                ? 'This order was cancelled. Reserved items will be returned to stock shortly.'
+                : 'This order was cancelled. Reserved items were returned to stock.',
             style: TextStyle(color: statusColor(status)),
           ),
         ].map((w) => w is Text ? Expanded(child: w) : w).toList(),
