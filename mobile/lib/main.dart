@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:shop_core/shop_core.dart';
 
@@ -18,6 +19,10 @@ void main() {
           baseUrl: Platform.isAndroid
               ? 'http://10.0.2.2:8000'
               : 'http://localhost:8000');
+
+  if (kReleaseMode && !config.isSecureOrLocal) {
+    throw StateError('Release builds must use an https:// API_BASE_URL.');
+  }
 
   final storage = SecureTokenStorage();
   late final AuthCubit auth;
@@ -38,7 +43,7 @@ void main() {
     orders: OrdersRepository(api),
     notifications: notifications,
     unread: UnreadCountCubit(PollingNotificationSource(notifications)),
-    cart: CartCubit(PrefsCartStorage())..load(),
+    cart: CartCubit(PrefsCartStorage()),
     products: ProductsCubit(catalog)..load(),
   ));
 }
