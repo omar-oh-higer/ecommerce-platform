@@ -205,7 +205,7 @@ endpoints:
         name: id
         description: 'The ID of the product.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -223,7 +223,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 16
+      id: 1
       product: 1
     queryParameters: []
     cleanQueryParameters: []

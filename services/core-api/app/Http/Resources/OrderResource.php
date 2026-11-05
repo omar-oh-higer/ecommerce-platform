@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -30,6 +31,12 @@ class OrderResource extends JsonResource
                 'name' => $this->user->name,
                 'email' => $this->user->email,
             ]),
+            // Cancelled orders only: "done" = stock is back in the inventory service,
+            // "pending" = the inventory service was down; a background job returns it as soon as it is back.
+            'stock_return' => $this->when(
+                $this->status === OrderStatus::Cancelled,
+                fn () => $this->stock_released_at ? 'done' : 'pending',
+            ),
             // Helps the admin screen show only the buttons that are allowed.
             'next_statuses' => $this->when($isAdmin, fn () => array_column($this->status->next(), 'value')),
             'created_at' => $this->created_at?->toIso8601String(),

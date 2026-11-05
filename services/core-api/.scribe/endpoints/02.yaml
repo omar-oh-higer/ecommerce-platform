@@ -167,7 +167,7 @@ endpoints:
         name: status
         description: ''
         required: false
-        example: confirmed
+        example: shipped
         type: string
         enumValues:
           - pending
@@ -201,7 +201,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      status: confirmed
+      status: shipped
       per_page: 1
       page: 22
     fileParameters: []
@@ -245,7 +245,7 @@ endpoints:
         name: id
         description: 'The ID of the order.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -263,7 +263,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      id: 16
+      id: 1
       order: 1
     queryParameters: []
     cleanQueryParameters: []

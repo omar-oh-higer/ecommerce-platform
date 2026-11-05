@@ -104,6 +104,9 @@ class OrderController extends Controller
      * **Admin only** (a customer gets 403, even on their own order).
      * Allowed: pending → confirmed | cancelled, confirmed → shipped | cancelled, shipped → delivered.
      * Cancelling gives the stock back to the inventory service. The customer is notified.
+     * Cancelling **always succeeds**, even when the inventory service is down: the response then has
+     * `stock_return: "pending"` and a background job returns the stock as soon as the service is back
+     * (`stock_return` becomes `"done"`).
      *
      * @group Administration
      *
@@ -113,7 +116,8 @@ class OrderController extends Controller
      *
      * @bodyParam status string required One of confirmed, shipped, delivered, cancelled. Example: confirmed
      *
-     * @response 200 {"data": {"id": 1, "status": "confirmed", "total": "53.50", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 2, "line_total": "24.00"}], "customer": {"id": 2, "name": "Test Customer", "email": "customer@store.test"}, "next_statuses": ["shipped", "cancelled"], "created_at": "2026-11-04T20:24:14+00:00", "updated_at": "2026-11-04T20:30:00+00:00"}}
+     * @response 200 scenario="Confirmed" {"data": {"id": 1, "status": "confirmed", "total": "53.50", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 2, "line_total": "24.00"}], "customer": {"id": 2, "name": "Test Customer", "email": "customer@store.test"}, "next_statuses": ["shipped", "cancelled"], "created_at": "2026-11-04T20:24:14+00:00", "updated_at": "2026-11-04T20:30:00+00:00"}}
+     * @response 200 scenario="Cancelled while the inventory service is down" {"data": {"id": 13, "status": "cancelled", "total": "36.00", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 3, "line_total": "36.00"}], "customer": {"id": 11, "name": "Test Customer", "email": "customer@store.test"}, "stock_return": "pending", "next_statuses": [], "created_at": "2026-11-05T10:27:12+00:00", "updated_at": "2026-11-05T10:27:15+00:00"}}
      * @response 403 scenario="Customer token" {"error": {"code": "FORBIDDEN", "message": "This action is reserved for administrators.", "details": {}}}
      * @response 409 scenario="Transition not allowed" {"error": {"code": "INVALID_STATUS_TRANSITION", "message": "An order cannot move from 'delivered' to 'cancelled'.", "details": {"current": "delivered", "allowed": []}}}
      */

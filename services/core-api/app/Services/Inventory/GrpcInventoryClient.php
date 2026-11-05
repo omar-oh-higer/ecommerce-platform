@@ -121,10 +121,13 @@ class GrpcInventoryClient implements InventoryClient
             $call = $start($this->stub(), ['timeout' => $this->timeoutMs * 1000]); // microseconds
             [$reply, $status] = $call->wait();
         } catch (\Throwable $e) {
+            $this->resetChannel();
             throw new InventoryUnavailableException($e);
         }
 
         if ($status->code !== \Grpc\STATUS_OK) {
+            $this->resetChannel();
+
             $reason = new RuntimeException(sprintf(
                 'Inventory %s failed: %s (code %d) after %d ms',
                 $method, $status->details, $status->code, (int) ((microtime(true) - $started) * 1000),
@@ -141,13 +144,40 @@ class GrpcInventoryClient implements InventoryClient
         return $reply;
     }
 
+    /** Bumped after every failure, see resetChannel(). Lives as long as the PHP process. */
+    private static int $channelGeneration = 0;
+
+    /**
+     * Drop a channel that just failed.
+     *
+     * A channel remembers its last DNS lookup: while the inventory container is stopped its
+     * name does not resolve. The PHP gRPC extension also keeps channels alive (persistent),
+     * keyed by host + options, so "a new channel with the same options" is the same broken one.
+     * The long-running queue worker kept failing with that cached error for about a minute after
+     * the service was back. A new generation number makes the next channel really new, so the
+     * name is resolved again on the next call.
+     */
+    private function resetChannel(): void
+    {
+        $this->stub?->close();
+        $this->stub = null;
+        self::$channelGeneration++;
+    }
+
     private function stub(): InventoryStub
     {
-        return $this->stub ??= new InventoryStub($this->host, [
+        $options = [
             'credentials' => ChannelCredentials::createInsecure(), // internal Docker network
             // Fail fast when the service is down instead of waiting to reconnect.
             'grpc.initial_reconnect_backoff_ms' => 200,
             'grpc.max_reconnect_backoff_ms' => 1000,
-        ]);
+        ];
+
+        if (self::$channelGeneration > 0) {
+            // Different options = different persistent channel = fresh DNS lookup.
+            $options['grpc.primary_user_agent'] = 'core-api/channel-'.self::$channelGeneration;
+        }
+
+        return $this->stub ??= new InventoryStub($this->host, $options);
     }
 }

@@ -71,6 +71,7 @@ class Order extends Equatable {
     this.items = const [],
     this.customer,
     this.nextStatuses = const [],
+    this.stockReturnPending = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -88,6 +89,11 @@ class Order extends Equatable {
 
   /// Admin only: the statuses this order may move to. Drive buttons from it.
   final List<OrderStatus> nextStatuses;
+
+  /// Cancelled orders only: the inventory service was down when the order was
+  /// cancelled, so its stock has not been returned yet. The server returns it
+  /// automatically as soon as the service is back (`stock_return: "pending"`).
+  final bool stockReturnPending;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -108,6 +114,7 @@ class Order extends Equatable {
       nextStatuses: [
         for (final s in (j['next_statuses'] as List? ?? const [])) OrderStatus.parse(s)
       ],
+      stockReturnPending: j['stock_return'] == 'pending',
       createdAt: DateTime.tryParse((j['created_at'] ?? '').toString()),
       updatedAt: DateTime.tryParse((j['updated_at'] ?? '').toString()),
     );
@@ -115,7 +122,7 @@ class Order extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, status, total, itemsCount, items, customer, nextStatuses, createdAt, updatedAt];
+      [id, status, total, itemsCount, items, customer, nextStatuses, stockReturnPending, createdAt, updatedAt];
 }
 
 /// A line to send to `POST /orders`. Price is never sent: the server decides it.

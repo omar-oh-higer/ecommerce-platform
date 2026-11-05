@@ -47,14 +47,17 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final repo = context.read<OrdersRepository>();
     final list = context.read<OrdersCubit>();
     if (target == OrderStatus.cancelled) {
+      // Close the dialog with ITS OWN context. This page lives inside the shell's nested
+      // navigator while dialogs open on the root navigator: popping with the page's context
+      // closed the order page instead of the dialog, so the request was never sent.
       final ok = await showDialog<bool>(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: const Text('Cancel this order?'),
           content: const Text('The reserved items will be returned to stock. This cannot be undone.'),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep order')),
-            FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Cancel order')),
+            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Keep order')),
+            FilledButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Cancel order')),
           ],
         ),
       );
@@ -68,7 +71,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       final updated = await repo.updateStatus(widget.orderId, target);
       if (!mounted) return;
       setState(() => _order = updated);
-      showSnack(context, 'Order #${updated.id} is now ${updated.status.label.toLowerCase()}');
+      showSnack(
+        context,
+        updated.stockReturnPending
+            ? 'Order #${updated.id} is cancelled. The stock service is unavailable right now: '
+                'the items will be returned to stock automatically as soon as it is back.'
+            : 'Order #${updated.id} is now ${updated.status.label.toLowerCase()}',
+      );
       list.refresh();
     } on InvalidTransitionFailure catch (f) {
       // Someone else changed it first: show the truth.
@@ -76,6 +85,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       await _load();
     } on AppFailure catch (f) {
       if (mounted) setState(() => _actionFailure = f);
+    } catch (_) {
+      // Never fail silently: any unexpected error still shows a message.
+      if (mounted) {
+        setState(() => _actionFailure =
+            const ServerFailure('Something went wrong. Please refresh and try again.'));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -159,6 +174,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     Text('Change status', style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     // Only the moves the server allows right now.
+                    if (o.stockReturnPending) ...[
+                      Text(
+                        'Stock return pending: the stock service was unavailable when this order was '
+                        'cancelled. The items return to stock automatically as soon as it is back.',
+                        style: TextStyle(color: Colors.orange.shade800),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     if (o.nextStatuses.isEmpty)
                       Text('This order is ${o.status.label.toLowerCase()} and cannot change any more.')
                     else

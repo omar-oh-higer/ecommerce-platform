@@ -68,7 +68,7 @@ endpoints:
         name: unread
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -97,7 +97,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      unread: true
+      unread: false
       per_page: 1
       page: 22
     fileParameters: []

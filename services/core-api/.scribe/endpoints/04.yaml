@@ -224,7 +224,7 @@ endpoints:
         name: product_id
         description: 'The ID of the product.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -242,7 +242,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      product_id: 16
+      product_id: 1
       product: 1
     queryParameters: []
     cleanQueryParameters: []
@@ -298,6 +298,9 @@ endpoints:
         **Admin only** (a customer gets 403, even on their own order).
         Allowed: pending → confirmed | cancelled, confirmed → shipped | cancelled, shipped → delivered.
         Cancelling gives the stock back to the inventory service. The customer is notified.
+        Cancelling **always succeeds**, even when the inventory service is down: the response then has
+        `stock_return: "pending"` and a background job returns the stock as soon as the service is back
+        (`stock_return` becomes `"done"`).
       authenticated: true
       deprecated: false
     headers:
@@ -310,7 +313,7 @@ endpoints:
         name: order_id
         description: 'The ID of the order.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -328,7 +331,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      order_id: 16
+      order_id: 1
       order: 1
     queryParameters: []
     cleanQueryParameters: []
@@ -353,7 +356,13 @@ endpoints:
         status: 200
         content: '{"data": {"id": 1, "status": "confirmed", "total": "53.50", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 2, "line_total": "24.00"}], "customer": {"id": 2, "name": "Test Customer", "email": "customer@store.test"}, "next_statuses": ["shipped", "cancelled"], "created_at": "2026-11-04T20:24:14+00:00", "updated_at": "2026-11-04T20:30:00+00:00"}}'
         headers: []
-        description: ''
+        description: Confirmed
+      -
+        custom: []
+        status: 200
+        content: '{"data": {"id": 13, "status": "cancelled", "total": "36.00", "items": [{"product_id": 6, "name": "Cotton T-Shirt", "unit_price": "12.00", "quantity": 3, "line_total": "36.00"}], "customer": {"id": 11, "name": "Test Customer", "email": "customer@store.test"}, "stock_return": "pending", "next_statuses": [], "created_at": "2026-11-05T10:27:12+00:00", "updated_at": "2026-11-05T10:27:15+00:00"}}'
+        headers: []
+        description: 'Cancelled while the inventory service is down'
       -
         custom: []
         status: 403

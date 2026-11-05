@@ -1229,7 +1229,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the product.'
-        example: 16
+        example: 1
         required: true
         schema:
           type: integer
@@ -1614,7 +1614,7 @@ paths:
                 status:
                   type: string
                   description: ''
-                  example: confirmed
+                  example: shipped
                   enum:
                     - pending
                     - confirmed
@@ -1769,7 +1769,7 @@ paths:
         in: path
         name: id
         description: 'The ID of the order.'
-        example: 16
+        example: 1
         required: true
         schema:
           type: integer
@@ -1985,7 +1985,7 @@ paths:
                 unread:
                   type: boolean
                   description: ''
-                  example: true
+                  example: false
                 per_page:
                   type: integer
                   description: 'Must be at least 1. Must not be greater than 50.'
@@ -2258,7 +2258,7 @@ paths:
         in: path
         name: product_id
         description: 'The ID of the product.'
-        example: 16
+        example: 1
         required: true
         schema:
           type: integer
@@ -2274,7 +2274,7 @@ paths:
     patch:
       summary: 'Change order status'
       operationId: changeOrderStatus
-      description: "**Admin only** (a customer gets 403, even on their own order).\nAllowed: pending → confirmed | cancelled, confirmed → shipped | cancelled, shipped → delivered.\nCancelling gives the stock back to the inventory service. The customer is notified."
+      description: "**Admin only** (a customer gets 403, even on their own order).\nAllowed: pending → confirmed | cancelled, confirmed → shipped | cancelled, shipped → delivered.\nCancelling gives the stock back to the inventory service. The customer is notified.\nCancelling **always succeeds**, even when the inventory service is down: the response then has\n`stock_return: \"pending\"` and a background job returns the stock as soon as the service is back\n(`stock_return` becomes `\"done\"`)."
       parameters: []
       responses:
         200:
@@ -2282,93 +2282,183 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                example:
-                  data:
-                    id: 1
-                    status: confirmed
-                    total: '53.50'
-                    items:
-                      -
-                        product_id: 6
-                        name: 'Cotton T-Shirt'
-                        unit_price: '12.00'
-                        quantity: 2
-                        line_total: '24.00'
-                    customer:
-                      id: 2
-                      name: 'Test Customer'
-                      email: customer@store.test
-                    next_statuses:
-                      - shipped
-                      - cancelled
-                    created_at: '2026-11-04T20:24:14+00:00'
-                    updated_at: '2026-11-04T20:30:00+00:00'
-                properties:
-                  data:
+                oneOf:
+                  -
+                    description: Confirmed
                     type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      status:
-                        type: string
-                        example: confirmed
-                      total:
-                        type: string
-                        example: '53.50'
-                      items:
-                        type: array
-                        example:
+                    example:
+                      data:
+                        id: 1
+                        status: confirmed
+                        total: '53.50'
+                        items:
                           -
                             product_id: 6
                             name: 'Cotton T-Shirt'
                             unit_price: '12.00'
                             quantity: 2
                             line_total: '24.00'
-                        items:
-                          type: object
-                          properties:
-                            product_id:
-                              type: integer
-                              example: 6
-                            name:
-                              type: string
-                              example: 'Cotton T-Shirt'
-                            unit_price:
-                              type: string
-                              example: '12.00'
-                            quantity:
-                              type: integer
-                              example: 2
-                            line_total:
-                              type: string
-                              example: '24.00'
-                      customer:
+                        customer:
+                          id: 2
+                          name: 'Test Customer'
+                          email: customer@store.test
+                        next_statuses:
+                          - shipped
+                          - cancelled
+                        created_at: '2026-11-04T20:24:14+00:00'
+                        updated_at: '2026-11-04T20:30:00+00:00'
+                    properties:
+                      data:
                         type: object
                         properties:
                           id:
                             type: integer
-                            example: 2
-                          name:
+                            example: 1
+                          status:
                             type: string
-                            example: 'Test Customer'
-                          email:
+                            example: confirmed
+                          total:
                             type: string
-                            example: customer@store.test
-                      next_statuses:
-                        type: array
-                        example:
-                          - shipped
-                          - cancelled
+                            example: '53.50'
+                          items:
+                            type: array
+                            example:
+                              -
+                                product_id: 6
+                                name: 'Cotton T-Shirt'
+                                unit_price: '12.00'
+                                quantity: 2
+                                line_total: '24.00'
+                            items:
+                              type: object
+                              properties:
+                                product_id:
+                                  type: integer
+                                  example: 6
+                                name:
+                                  type: string
+                                  example: 'Cotton T-Shirt'
+                                unit_price:
+                                  type: string
+                                  example: '12.00'
+                                quantity:
+                                  type: integer
+                                  example: 2
+                                line_total:
+                                  type: string
+                                  example: '24.00'
+                          customer:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 2
+                              name:
+                                type: string
+                                example: 'Test Customer'
+                              email:
+                                type: string
+                                example: customer@store.test
+                          next_statuses:
+                            type: array
+                            example:
+                              - shipped
+                              - cancelled
+                            items:
+                              type: string
+                          created_at:
+                            type: string
+                            example: '2026-11-04T20:24:14+00:00'
+                          updated_at:
+                            type: string
+                            example: '2026-11-04T20:30:00+00:00'
+                  -
+                    description: 'Cancelled while the inventory service is down'
+                    type: object
+                    example:
+                      data:
+                        id: 13
+                        status: cancelled
+                        total: '36.00'
                         items:
-                          type: string
-                      created_at:
-                        type: string
-                        example: '2026-11-04T20:24:14+00:00'
-                      updated_at:
-                        type: string
-                        example: '2026-11-04T20:30:00+00:00'
+                          -
+                            product_id: 6
+                            name: 'Cotton T-Shirt'
+                            unit_price: '12.00'
+                            quantity: 3
+                            line_total: '36.00'
+                        customer:
+                          id: 11
+                          name: 'Test Customer'
+                          email: customer@store.test
+                        stock_return: pending
+                        next_statuses: []
+                        created_at: '2026-11-05T10:27:12+00:00'
+                        updated_at: '2026-11-05T10:27:15+00:00'
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 13
+                          status:
+                            type: string
+                            example: cancelled
+                          total:
+                            type: string
+                            example: '36.00'
+                          items:
+                            type: array
+                            example:
+                              -
+                                product_id: 6
+                                name: 'Cotton T-Shirt'
+                                unit_price: '12.00'
+                                quantity: 3
+                                line_total: '36.00'
+                            items:
+                              type: object
+                              properties:
+                                product_id:
+                                  type: integer
+                                  example: 6
+                                name:
+                                  type: string
+                                  example: 'Cotton T-Shirt'
+                                unit_price:
+                                  type: string
+                                  example: '12.00'
+                                quantity:
+                                  type: integer
+                                  example: 3
+                                line_total:
+                                  type: string
+                                  example: '36.00'
+                          customer:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 11
+                              name:
+                                type: string
+                                example: 'Test Customer'
+                              email:
+                                type: string
+                                example: customer@store.test
+                          stock_return:
+                            type: string
+                            example: pending
+                          next_statuses:
+                            type: array
+                            example: []
+                          created_at:
+                            type: string
+                            example: '2026-11-05T10:27:12+00:00'
+                          updated_at:
+                            type: string
+                            example: '2026-11-05T10:27:15+00:00'
         403:
           description: 'Customer token'
           content:
@@ -2445,7 +2535,7 @@ paths:
         in: path
         name: order_id
         description: 'The ID of the order.'
-        example: 16
+        example: 1
         required: true
         schema:
           type: integer
