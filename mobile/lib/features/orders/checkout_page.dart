@@ -15,6 +15,9 @@ class CheckoutPage extends StatelessWidget {
     return BlocConsumer<CheckoutCubit, CheckoutState>(
       listener: (context, state) {
         if (state is CheckoutSuccess) {
+          // The notification is created in the background: look again shortly.
+          final unread = context.read<UnreadCountCubit>();
+          Future<void>.delayed(const Duration(seconds: 3), unread.refresh);
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('Order placed')));
           context.go('/orders/${state.order.id}');
