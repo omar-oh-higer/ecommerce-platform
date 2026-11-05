@@ -61,6 +61,19 @@ class _ProductsPageState extends State<ProductsPage> {
             onPressed: () => context.push('/cart'),
           ),
           IconButton(
+            tooltip: 'Notifications',
+            icon: BlocBuilder<UnreadCountCubit, int>(
+              builder: (context, count) => Badge(
+                isLabelVisible: count > 0,
+                label: Text('$count'),
+                child: const Icon(Icons.notifications_outlined),
+              ),
+            ),
+            onPressed: () => context.push('/notifications').then((_) {
+              if (context.mounted) context.read<UnreadCountCubit>().refresh();
+            }),
+          ),
+          IconButton(
             tooltip: 'My orders',
             icon: const Icon(Icons.receipt_long_outlined),
             onPressed: () => context.push('/orders'),

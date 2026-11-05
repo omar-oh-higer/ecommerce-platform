@@ -9,6 +9,7 @@ import 'features/auth/login_page.dart';
 import 'features/auth/register_page.dart';
 import 'features/cart/cart_cubit.dart';
 import 'features/cart/cart_page.dart';
+import 'features/notifications/notifications_page.dart';
 import 'features/orders/checkout_cubit.dart';
 import 'features/orders/checkout_page.dart';
 import 'features/orders/order_detail_page.dart';
@@ -26,12 +27,16 @@ class ShopApp extends StatefulWidget {
     required this.api,
     required this.catalog,
     required this.orders,
+    required this.notifications,
+    required this.unread,
     required this.cart,
     required this.products,
   });
 
   final CatalogRepository catalog;
   final OrdersRepository orders;
+  final NotificationsRepository notifications;
+  final UnreadCountCubit unread;
   final CartCubit cart;
   final ProductsCubit products;
   final AuthCubit auth;
@@ -42,8 +47,44 @@ class ShopApp extends StatefulWidget {
   State<ShopApp> createState() => _ShopAppState();
 }
 
-class _ShopAppState extends State<ShopApp> {
+class _ShopAppState extends State<ShopApp> with WidgetsBindingObserver {
   late final GoRouter _router = _buildRouter(widget.auth);
+  late final StreamSubscription<AuthState> _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Poll for notifications only while a user is signed in.
+    _authSub = widget.auth.stream.listen(_onAuth);
+    _onAuth(widget.auth.state);
+  }
+
+  void _onAuth(AuthState s) {
+    if (s is Authenticated) {
+      widget.unread.start();
+    } else if (s is Unauthenticated) {
+      widget.unread.reset();
+    }
+  }
+
+  /// No polling in the background; refresh as soon as the app comes back.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (widget.auth.state is! Authenticated) return;
+    if (state == AppLifecycleState.resumed) {
+      widget.unread.start();
+    } else if (state == AppLifecycleState.paused) {
+      widget.unread.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _authSub.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +94,14 @@ class _ShopAppState extends State<ShopApp> {
         RepositoryProvider.value(value: widget.config),
         RepositoryProvider.value(value: widget.catalog),
         RepositoryProvider.value(value: widget.orders),
+        RepositoryProvider.value(value: widget.notifications),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider.value(value: widget.auth),
           BlocProvider.value(value: widget.cart),
           BlocProvider.value(value: widget.products),
+          BlocProvider.value(value: widget.unread),
         ],
         child: MaterialApp.router(
           title: 'Shop',
@@ -99,6 +142,13 @@ GoRouter _buildRouter(AuthCubit auth) {
             ProductDetailPage(productId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(path: '/cart', builder: (_, _) => const CartPage()),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, _) => BlocProvider(
+          create: (_) => NotificationsCubit(context.read<NotificationsRepository>())..load(),
+          child: const NotificationsPage(),
+        ),
+      ),
       GoRoute(
         path: '/checkout',
         builder: (context, _) => BlocProvider(

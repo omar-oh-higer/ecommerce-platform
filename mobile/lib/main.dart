@@ -29,12 +29,15 @@ void main() {
   auth = AuthCubit(AuthRepository(api: api, storage: storage))..start();
 
   final catalog = CatalogRepository(api);
+  final notifications = NotificationsRepository(api);
   runApp(ShopApp(
     auth: auth,
     config: config,
     api: api,
     catalog: catalog,
     orders: OrdersRepository(api),
+    notifications: notifications,
+    unread: UnreadCountCubit(PollingNotificationSource(notifications)),
     cart: CartCubit(PrefsCartStorage())..load(),
     products: ProductsCubit(catalog)..load(),
   ));
