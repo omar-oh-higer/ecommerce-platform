@@ -62,8 +62,10 @@ class _ShopAppState extends State<ShopApp> with WidgetsBindingObserver {
 
   void _onAuth(AuthState s) {
     if (s is Authenticated) {
+      widget.cart.bindUser(s.user.id);
       widget.unread.start();
     } else if (s is Unauthenticated) {
+      widget.cart.bindUser(null);
       widget.unread.reset();
     }
   }

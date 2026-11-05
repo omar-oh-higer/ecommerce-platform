@@ -9,9 +9,9 @@ class MockOrders extends Mock implements OrdersRepository {}
 
 class MemStorage implements CartStorage {
   @override
-  Future<String?> read() async => null;
+  Future<String?> read(String userKey) async => null;
   @override
-  Future<void> write(String json) async {}
+  Future<void> write(String userKey, String json) async {}
 }
 
 Product product(int id, {int qty = 10}) => Product(
@@ -32,7 +32,9 @@ void main() {
 
   setUp(() {
     orders = MockOrders();
-    cart = CartCubit(MemStorage())..add(product(1), quantity: 2);
+    cart = CartCubit(MemStorage());
+    cart.bindUser(1);
+    cart.add(product(1), quantity: 2);
   });
 
   blocTest<CheckoutCubit, CheckoutState>(

@@ -23,6 +23,9 @@ cd mobile && flutter run --dart-define=API_BASE_URL=http://localhost:8000
 cd dashboard && flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000
 ```
 
+See also: [flutter-architecture.md](flutter-architecture.md) (structure and security notes) and
+[flutter-demo-script.md](flutter-demo-script.md) (demo scenarios).
+
 ## API reference
 Interactive docs once the backend is up: `http://localhost:8000/docs/`, `/swagger/`,
 `/docs/openapi.yaml`, `/docs/collection.json` (Postman). See `docs/frontend-guide/`.

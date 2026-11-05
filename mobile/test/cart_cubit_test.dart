@@ -3,11 +3,11 @@ import 'package:shop_core/shop_core.dart';
 import 'package:shop_mobile/features/cart/cart_cubit.dart';
 
 class MemoryCartStorage implements CartStorage {
-  String? value;
+  final values = <String, String>{};
   @override
-  Future<String?> read() async => value;
+  Future<String?> read(String userKey) async => values[userKey];
   @override
-  Future<void> write(String json) async => value = json;
+  Future<void> write(String userKey, String json) async => values[userKey] = json;
 }
 
 Product product(int id, {int? qty = 10, String price = '10.00', StockStatus status = StockStatus.inStock}) =>
@@ -26,6 +26,7 @@ void main() {
   setUp(() {
     storage = MemoryCartStorage();
     cart = CartCubit(storage);
+    cart.bindUser(1);
   });
 
   test('add merges lines and totals use exact money', () {
@@ -65,7 +66,7 @@ void main() {
   test('cart is saved and restored', () async {
     cart.add(product(1, price: '12.00'), quantity: 2);
     final restored = CartCubit(storage);
-    await restored.load();
+    await restored.bindUser(1);
     expect(restored.state.items.single.quantity, 2);
     expect(restored.state.total.cents, 2400);
   });
@@ -79,5 +80,23 @@ void main() {
     ]);
     expect(cart.state.items.length, 1);
     expect(cart.state.items.single.quantity, 2);
+  });
+
+  test('each user has their own cart on a shared phone', () async {
+    cart.add(product(1), quantity: 2);
+    await cart.bindUser(2); // someone else signs in
+    expect(cart.state.isEmpty, isTrue);
+    cart.add(product(2));
+    await cart.bindUser(null); // sign out: nothing is kept in memory
+    expect(cart.state.isEmpty, isTrue);
+    await cart.bindUser(1); // first user comes back
+    expect(cart.state.items.single.productId, 1);
+    expect(cart.state.items.single.quantity, 2);
+  });
+
+  test('nothing is saved while signed out', () async {
+    await cart.bindUser(null);
+    cart.add(product(9));
+    expect(storage.values.keys, isNot(contains('null')));
   });
 }

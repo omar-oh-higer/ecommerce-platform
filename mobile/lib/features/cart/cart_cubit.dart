@@ -73,18 +73,21 @@ class CartState extends Equatable {
   List<Object?> get props => [items];
 }
 
+/// Saves one cart per user (`userKey`), so two people sharing a phone never
+/// see each other's cart.
 abstract class CartStorage {
-  Future<String?> read();
-  Future<void> write(String json);
+  Future<String?> read(String userKey);
+  Future<void> write(String userKey, String json);
 }
 
 class PrefsCartStorage implements CartStorage {
-  static const _key = 'cart_v1';
+  static String _key(String userKey) => 'cart_v2_$userKey';
   @override
-  Future<String?> read() async => (await SharedPreferences.getInstance()).getString(_key);
+  Future<String?> read(String userKey) async =>
+      (await SharedPreferences.getInstance()).getString(_key(userKey));
   @override
-  Future<void> write(String json) async =>
-      (await SharedPreferences.getInstance()).setString(_key, json);
+  Future<void> write(String userKey, String json) async =>
+      (await SharedPreferences.getInstance()).setString(_key(userKey), json);
 }
 
 /// Local shopping cart (the API has no cart endpoint). Survives app restarts.
@@ -92,11 +95,24 @@ class CartCubit extends Cubit<CartState> {
   CartCubit(this._storage) : super(const CartState());
 
   final CartStorage _storage;
+  String? _userKey;
+
+  /// Called when the signed-in user changes. `null` (signed out) empties the
+  /// in-memory cart; the saved cart of that user stays for their next sign in.
+  Future<void> bindUser(int? userId) async {
+    final key = userId?.toString();
+    if (key == _userKey) return;
+    _userKey = key;
+    emit(const CartState());
+    if (key != null) await load();
+  }
 
   Future<void> load() async {
+    final key = _userKey;
+    if (key == null) return;
     try {
-      final raw = await _storage.read();
-      if (raw == null) return;
+      final raw = await _storage.read(key);
+      if (raw == null || key != _userKey) return;
       emit(CartState([
         for (final j in (jsonDecode(raw) as List)) CartItem.fromJson((j as Map).cast<String, dynamic>())
       ]));
@@ -166,6 +182,7 @@ class CartCubit extends Cubit<CartState> {
 
   void _set(List<CartItem> items) {
     emit(CartState(items));
-    _storage.write(jsonEncode([for (final i in items) i.toJson()]));
+    final key = _userKey;
+    if (key != null) _storage.write(key, jsonEncode([for (final i in items) i.toJson()]));
   }
 }
